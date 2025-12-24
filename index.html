@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heights and Distances Explorer</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    .concept-card {
+      transition: all 0.3s ease;
+    }
+    
+    .concept-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    .formula-box {
+      transition: all 0.3s ease;
+    }
+    
+    .formula-box:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .slider-btn:hover {
+      opacity: 0.9;
+    }
+
+    .show-solution-btn:hover {
+      opacity: 0.9;
+    }
+
+    canvas {
+      border-radius: 8px;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app-container" class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+   <div class="min-h-full px-4 py-8 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto"><!-- Header -->
+     <div class="text-center mb-8" style="background: #ffffff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <h1 id="main-title" class="mb-2" style="font-family: 'Georgia', serif; font-size: 48px; font-weight: bold; color: #1a202c;">Heights and Distances</h1>
+      <p id="subtitle" style="font-family: 'Arial', sans-serif; font-size: 20px; color: #4a5568;">Master Trigonometry Applications for ICSE Class 10</p>
+     </div><!-- Key Concepts Section -->
+     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <h2 id="concepts-heading" class="mb-6" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">📚 Key Concepts</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"><!-- Angle of Elevation -->
+       <div class="concept-card" style="background: #ebf8ff; border-radius: 12px; padding: 20px; border: 2px solid #4299e1;">
+        <h3 class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: 600; color: #2d3748;">📐 Angle of Elevation</h3>
+        <p class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6;">The angle formed between the horizontal line and the line of sight when looking <strong>upward</strong> at an object.</p>
+        <canvas id="elevation-canvas" width="280" height="180" style="width: 100%; max-width: 280px; height: auto; background: #ffffff;"></canvas>
+       </div><!-- Angle of Depression -->
+       <div class="concept-card" style="background: #fef5e7; border-radius: 12px; padding: 20px; border: 2px solid #f59e0b;">
+        <h3 class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: 600; color: #2d3748;">📉 Angle of Depression</h3>
+        <p class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6;">The angle formed between the horizontal line and the line of sight when looking <strong>downward</strong> at an object.</p>
+        <canvas id="depression-canvas" width="280" height="180" style="width: 100%; max-width: 280px; height: auto; background: #ffffff;"></canvas>
+       </div>
+      </div>
+      <div class="p-4" style="background: #e6fffa; border-radius: 12px; border-left: 4px solid #38b2ac;">
+       <p style="font-family: 'Arial', sans-serif; font-size: 16px; color: #2d3748; line-height: 1.6;"><strong>Important:</strong> The angle of elevation from point A to B equals the angle of depression from point B to A (alternate angles).</p>
+      </div>
+     </div><!-- Interactive Visualizer -->
+     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <h2 class="mb-4" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">🎯 Interactive Angle Visualizer</h2>
+      <div class="mb-4"><label for="angle-slider" class="block mb-2" style="font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 600; color: #4a5568;"> Angle of Elevation: <span id="angle-value" style="color: #4facfe; font-size: 20px;">30</span>° </label> <input type="range" id="angle-slider" min="10" max="80" value="30" class="w-full" style="cursor: pointer;">
+      </div>
+      <div class="text-center">
+       <canvas id="interactive-canvas" width="500" height="350" style="max-width: 100%; height: auto; background: #f7fafc; border: 2px solid #e2e8f0;"></canvas>
+      </div>
+      <div class="mt-4 grid grid-cols-3 gap-4">
+       <div class="text-center p-3" style="background: #ebf8ff; border-radius: 8px;">
+        <p style="font-family: 'Arial', sans-serif; font-size: 14px; color: #4a5568;">Height</p>
+        <p id="height-display" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; color: #4facfe;">50</p>
+       </div>
+       <div class="text-center p-3" style="background: #fef5e7; border-radius: 8px;">
+        <p style="font-family: 'Arial', sans-serif; font-size: 14px; color: #4a5568;">Distance</p>
+        <p id="distance-display" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; color: #f59e0b;">86.6</p>
+       </div>
+       <div class="text-center p-3" style="background: #e6fffa; border-radius: 8px;">
+        <p style="font-family: 'Arial', sans-serif; font-size: 14px; color: #4a5568;">Hypotenuse</p>
+        <p id="hypotenuse-display" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; color: #38b2ac;">100</p>
+       </div>
+      </div>
+     </div><!-- Key Formulas -->
+     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <h2 id="formula-heading" class="mb-4" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">📐 Essential Formulas</h2>
+      <div class="space-y-4">
+       <div class="formula-box p-4" style="background: #f7fafc; border-radius: 12px; border: 2px solid #e2e8f0;">
+        <h3 class="mb-2" style="font-family: 'Arial', sans-serif; font-size: 18px; font-weight: 600; color: #2d3748;">Trigonometric Ratios:</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+         <p class="text-center py-2" style="font-family: 'Georgia', serif; font-size: 18px; color: #4facfe;">sin θ = Opposite / Hypotenuse</p>
+         <p class="text-center py-2" style="font-family: 'Georgia', serif; font-size: 18px; color: #4facfe;">cos θ = Adjacent / Hypotenuse</p>
+         <p class="text-center py-2" style="font-family: 'Georgia', serif; font-size: 18px; color: #4facfe;">tan θ = Opposite / Adjacent</p>
+        </div>
+       </div>
+       <div class="formula-box p-4" style="background: #f7fafc; border-radius: 12px; border: 2px solid #e2e8f0;">
+        <h3 class="mb-2" style="font-family: 'Arial', sans-serif; font-size: 18px; font-weight: 600; color: #2d3748;">Common Height-Distance Formulas:</h3>
+        <div class="space-y-2">
+         <p class="py-1" style="font-family: 'Georgia', serif; font-size: 16px; color: #718096;">Height = Distance × tan(angle)</p>
+         <p class="py-1" style="font-family: 'Georgia', serif; font-size: 16px; color: #718096;">Distance = Height / tan(angle)</p>
+         <p class="py-1" style="font-family: 'Georgia', serif; font-size: 16px; color: #718096;">Distance = Height × cot(angle)</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Practice Problems -->
+     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <h2 id="practice-heading" class="mb-4" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">✏️ Practice Problems</h2>
+      <div id="problems-container" class="space-y-4"><!-- Problems will be added here -->
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      main_title: "Heights and Distances",
+      subtitle: "Master Trigonometry Applications for ICSE Class 10",
+      concepts_heading: "📚 Key Concepts",
+      formula_heading: "📐 Essential Formulas",
+      practice_heading: "✏️ Practice Problems",
+      background_color: "#4facfe",
+      surface_color: "#ffffff",
+      text_color: "#2d3748",
+      primary_action_color: "#4facfe",
+      secondary_action_color: "#f59e0b"
+    };
+
+    let currentConfig = { ...defaultConfig };
+
+    const problems = [
+      {
+        question: "A tower is 50m high. From a point on the ground, the angle of elevation to the top of the tower is 30°. Find the distance of the point from the base of the tower.",
+        solution: "Given:\nHeight of tower (h) = 50m\nAngle of elevation (θ) = 30°\n\nLet distance from base = d\n\nUsing tan θ = h/d\ntan 30° = 50/d\n1/√3 = 50/d\nd = 50√3\nd = 50 × 1.732\nd = 86.6 m",
+        answer: "86.6 m"
+      },
+      {
+        question: "From the top of a 75m high lighthouse, the angle of depression of a ship is 45°. Find the distance of the ship from the base of the lighthouse.",
+        solution: "Given:\nHeight of lighthouse (h) = 75m\nAngle of depression = 45°\n\nNote: Angle of depression = Angle of elevation (alternate angles)\nSo, angle of elevation = 45°\n\nLet distance = d\n\nUsing tan θ = h/d\ntan 45° = 75/d\n1 = 75/d\nd = 75 m",
+        answer: "75 m"
+      },
+      {
+        question: "A ladder 20m long reaches a window 16m above the ground. Find the angle the ladder makes with the ground.",
+        solution: "Given:\nLength of ladder (hypotenuse) = 20m\nHeight of window (opposite) = 16m\n\nLet angle with ground = θ\n\nUsing sin θ = opposite/hypotenuse\nsin θ = 16/20\nsin θ = 0.8\nθ = sin⁻¹(0.8)\nθ ≈ 53.13°\n\nAlternatively:\nθ = sin⁻¹(4/5) ≈ 53° (or 53°8')",
+        answer: "53.13° or 53°8'"
+      },
+      {
+        question: "From a point on the ground, the angles of elevation of the bottom and top of a tower standing on a building 30m high are 45° and 60° respectively. Find the height of the tower.",
+        solution: "Given:\nHeight of building = 30m\nAngle to bottom of tower = 45°\nAngle to top of tower = 60°\n\nLet distance from building = d\nLet height of tower = h\n\nFrom angle to bottom:\ntan 45° = 30/d\n1 = 30/d\nd = 30m\n\nFrom angle to top:\ntan 60° = (30 + h)/d\n√3 = (30 + h)/30\n30√3 = 30 + h\nh = 30√3 - 30\nh = 30(√3 - 1)\nh = 30(1.732 - 1)\nh = 30 × 0.732\nh = 21.96 m ≈ 22m",
+        answer: "22 m"
+      },
+      {
+        question: "The shadow of a building is 20m when the angle of elevation of the sun is 60°. Find the height of the building.",
+        solution: "Given:\nLength of shadow (distance) = 20m\nAngle of elevation = 60°\n\nLet height of building = h\n\nUsing tan θ = h/d\ntan 60° = h/20\n√3 = h/20\nh = 20√3\nh = 20 × 1.732\nh = 34.64 m",
+        answer: "34.64 m"
+      },
+      {
+        question: "From the top of a cliff 100m high, the angles of depression of two boats in the same direction are 30° and 45°. Find the distance between the boats.",
+        solution: "Given:\nHeight of cliff (h) = 100m\nAngle of depression to boat 1 = 30°\nAngle of depression to boat 2 = 45°\n\nLet distance to boat 1 = d₁\nLet distance to boat 2 = d₂\n\nFor boat 1 (30° angle):\ntan 30° = 100/d₁\n1/√3 = 100/d₁\nd₁ = 100√3 = 173.2m\n\nFor boat 2 (45° angle):\ntan 45° = 100/d₂\n1 = 100/d₂\nd₂ = 100m\n\nDistance between boats = d₁ - d₂\n= 173.2 - 100\n= 73.2 m",
+        answer: "73.2 m"
+      },
+      {
+        question: "A man observes the angle of elevation of the top of a building to be 30°. He walks 50m towards the building and finds the angle of elevation to be 60°. Find the height of the building.",
+        solution: "Given:\nInitial angle = 30°\nFinal angle after walking 50m = 60°\n\nLet height = h\nLet initial distance = d\n\nFrom first position:\ntan 30° = h/d\n1/√3 = h/d\nd = h√3 ... (1)\n\nFrom second position:\ntan 60° = h/(d - 50)\n√3 = h/(d - 50)\nd - 50 = h/√3 ... (2)\n\nFrom (1): d = h√3\nSubstituting in (2):\nh√3 - 50 = h/√3\nh√3 - h/√3 = 50\nh(√3 - 1/√3) = 50\nh(3 - 1)/√3 = 50\n2h/√3 = 50\nh = 25√3\nh = 43.3 m",
+        answer: "43.3 m"
+      },
+      {
+        question: "The angle of elevation of the top of a tower from two points at distances 4m and 9m from the base in the same straight line are complementary. Find the height of the tower.",
+        solution: "Given:\nDistance 1 = 4m, angle = θ\nDistance 2 = 9m, angle = (90° - θ)\n(Complementary angles)\n\nLet height = h\n\nFrom first point:\ntan θ = h/4 ... (1)\n\nFrom second point:\ntan(90° - θ) = h/9\ncot θ = h/9\n1/tan θ = h/9 ... (2)\n\nFrom (1): tan θ = h/4\nFrom (2): 1/(h/4) = h/9\n4/h = h/9\n36 = h²\nh = 6 m",
+        answer: "6 m"
+      },
+      {
+        question: "From a point on a bridge across a river, the angles of depression of the banks on opposite sides are 30° and 45°. If the bridge is 10m above the banks, find the width of the river.",
+        solution: "Given:\nHeight of bridge = 10m\nAngle of depression to bank 1 = 30°\nAngle of depression to bank 2 = 45°\n\nLet distance to bank 1 = d₁\nLet distance to bank 2 = d₂\n\nFor bank 1 (30° angle):\ntan 30° = 10/d₁\n1/√3 = 10/d₁\nd₁ = 10√3 = 17.32m\n\nFor bank 2 (45° angle):\ntan 45° = 10/d₂\n1 = 10/d₂\nd₂ = 10m\n\nWidth of river = d₁ + d₂\n= 17.32 + 10\n= 27.32 m",
+        answer: "27.32 m"
+      },
+      {
+        question: "A vertical pole stands on level ground. From a point on the ground 25m from the base of the pole, the angle of elevation to the top is 45°. Find the height of the pole. If a flag of height 5m is placed on top of the pole, what will be the angle of elevation to the top of the flag from the same point?",
+        solution: "Part 1: Finding height of pole\nGiven: Distance = 25m, Angle = 45°\n\ntan 45° = h/25\n1 = h/25\nh = 25m\n\nPart 2: Angle to top of flag\nTotal height = 25 + 5 = 30m\nDistance = 25m\n\nLet new angle = α\ntan α = 30/25\ntan α = 6/5\ntan α = 1.2\nα = tan⁻¹(1.2)\nα ≈ 50.19°\n\nor α ≈ 50°11'",
+        answer: "Height: 25m, New angle: 50.19° or 50°11'"
+      }
+    ];
+
+    function getCurrentConfig() {
+      if (window.elementSdk && window.elementSdk.config) {
+        return window.elementSdk.config;
+      }
+      return currentConfig;
+    }
+
+    function drawElevationDiagram() {
+      const canvas = document.getElementById('elevation-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const config = getCurrentConfig();
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(30, 150);
+      ctx.lineTo(250, 150);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(250, 150);
+      ctx.lineTo(250, 50);
+      ctx.stroke();
+      
+      ctx.strokeStyle = primaryColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(30, 150);
+      ctx.lineTo(250, 50);
+      ctx.stroke();
+      
+      ctx.fillStyle = primaryColor;
+      ctx.beginPath();
+      ctx.arc(30, 150, 25, 0, -Math.PI/6, true);
+      ctx.lineTo(30, 150);
+      ctx.closePath();
+      ctx.globalAlpha = 0.3;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+      
+      ctx.fillStyle = '#2d3748';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText('θ', 40, 145);
+      ctx.fillText('Object', 230, 40);
+      ctx.fillText('Observer', 10, 170);
+    }
+
+    function drawDepressionDiagram() {
+      const canvas = document.getElementById('depression-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const config = getCurrentConfig();
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(30, 50);
+      ctx.lineTo(250, 50);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(250, 50);
+      ctx.lineTo(250, 150);
+      ctx.stroke();
+      
+      ctx.strokeStyle = secondaryColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(30, 50);
+      ctx.lineTo(250, 150);
+      ctx.stroke();
+      
+      ctx.fillStyle = secondaryColor;
+      ctx.beginPath();
+      ctx.arc(30, 50, 25, 0, Math.PI/6);
+      ctx.lineTo(30, 50);
+      ctx.closePath();
+      ctx.globalAlpha = 0.3;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+      
+      ctx.fillStyle = '#2d3748';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText('θ', 40, 65);
+      ctx.fillText('Observer', 5, 40);
+      ctx.fillText('Object', 230, 170);
+    }
+
+    function drawInteractiveCanvas() {
+      const canvas = document.getElementById('interactive-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const slider = document.getElementById('angle-slider');
+      const angle = parseInt(slider.value);
+      const angleRad = (angle * Math.PI) / 180;
+      
+      const config = getCurrentConfig();
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const baseX = 50;
+      const baseY = 300;
+      const distance = 300;
+      const height = distance * Math.tan(angleRad);
+      
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 3;
+      
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY);
+      ctx.lineTo(baseX + distance, baseY);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(baseX + distance, baseY);
+      ctx.lineTo(baseX + distance, baseY - height);
+      ctx.stroke();
+      
+      ctx.strokeStyle = primaryColor;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY);
+      ctx.lineTo(baseX + distance, baseY - height);
+      ctx.stroke();
+      
+      ctx.fillStyle = primaryColor;
+      ctx.beginPath();
+      ctx.arc(baseX, baseY, 40, -angleRad, 0);
+      ctx.lineTo(baseX, baseY);
+      ctx.closePath();
+      ctx.globalAlpha = 0.2;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+      
+      ctx.fillStyle = '#2d3748';
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText(angle + '°', baseX + 50, baseY - 10);
+      
+      ctx.fillStyle = '#4facfe';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText('h', baseX + distance + 15, baseY - height/2);
+      
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillText('d', baseX + distance/2 - 10, baseY + 25);
+      
+      const hypotenuse = distance / Math.cos(angleRad);
+      document.getElementById('angle-value').textContent = angle;
+      document.getElementById('height-display').textContent = height.toFixed(1);
+      document.getElementById('distance-display').textContent = distance.toFixed(1);
+      document.getElementById('hypotenuse-display').textContent = hypotenuse.toFixed(1);
+    }
+
+    function initializeProblems() {
+      const container = document.getElementById('problems-container');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      const config = getCurrentConfig();
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      
+      problems.forEach((problem, index) => {
+        const problemDiv = document.createElement('div');
+        problemDiv.className = 'problem-item';
+        problemDiv.style.cssText = `
+          background: #f7fafc;
+          border-radius: 12px;
+          padding: 20px;
+          border: 2px solid #e2e8f0;
+        `;
+        
+        const solutionId = `solution-${index}`;
+        const buttonId = `btn-${index}`;
+        
+        problemDiv.innerHTML = `
+          <p class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 17px; font-weight: 600; color: ${textColor};">
+            <span style="background: ${primaryColor}; color: #ffffff; padding: 4px 12px; border-radius: 6px; margin-right: 8px;">${index + 1}</span>
+            ${problem.question}
+          </p>
+          <button id="${buttonId}" class="show-solution-btn px-4 py-2 mb-3" style="background: ${secondaryColor}; color: #ffffff; border-radius: 6px; font-family: 'Arial', sans-serif; font-size: 14px; cursor: pointer; border: none; transition: all 0.3s ease;">
+            Show Solution
+          </button>
+          <div id="${solutionId}" class="solution-area" style="display: none; background: #ffffff; padding: 16px; border-radius: 8px; margin-top: 12px; border-left: 4px solid ${primaryColor};">
+            <p style="font-family: 'Arial', sans-serif; font-size: 15px; color: ${textColor}; white-space: pre-line; line-height: 1.8;">${problem.solution}</p>
+            <p class="mt-3" style="font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; color: ${primaryColor}; margin-top: 12px;">Answer: ${problem.answer}</p>
+          </div>
+        `;
+        
+        container.appendChild(problemDiv);
+        
+        const button = document.getElementById(buttonId);
+        if (button) {
+          button.addEventListener('click', function() {
+            const solutionDiv = document.getElementById(solutionId);
+            const config = getCurrentConfig();
+            const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+            const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+            
+            if (solutionDiv && solutionDiv.style.display === 'none') {
+              solutionDiv.style.display = 'block';
+              this.textContent = 'Hide Solution';
+              this.style.background = primaryColor;
+            } else if (solutionDiv) {
+              solutionDiv.style.display = 'none';
+              this.textContent = 'Show Solution';
+              this.style.background = secondaryColor;
+            }
+          });
+        }
+      });
+    }
+
+    async function onConfigChange(config) {
+      currentConfig = { ...config };
+      
+      const mainTitle = document.getElementById('main-title');
+      const subtitle = document.getElementById('subtitle');
+      const conceptsHeading = document.getElementById('concepts-heading');
+      const formulaHeading = document.getElementById('formula-heading');
+      const practiceHeading = document.getElementById('practice-heading');
+      const appContainer = document.getElementById('app-container');
+      
+      if (mainTitle) mainTitle.textContent = config.main_title || defaultConfig.main_title;
+      if (subtitle) subtitle.textContent = config.subtitle || defaultConfig.subtitle;
+      if (conceptsHeading) conceptsHeading.textContent = config.concepts_heading || defaultConfig.concepts_heading;
+      if (formulaHeading) formulaHeading.textContent = config.formula_heading || defaultConfig.formula_heading;
+      if (practiceHeading) practiceHeading.textContent = config.practice_heading || defaultConfig.practice_heading;
+      
+      if (appContainer) {
+        appContainer.style.background = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, #00f2fe 100%)`;
+      }
+
+      drawElevationDiagram();
+      drawDepressionDiagram();
+      drawInteractiveCanvas();
+      initializeProblems();
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["main_title", config.main_title || defaultConfig.main_title],
+          ["subtitle", config.subtitle || defaultConfig.subtitle],
+          ["concepts_heading", config.concepts_heading || defaultConfig.concepts_heading],
+          ["formula_heading", config.formula_heading || defaultConfig.formula_heading],
+          ["practice_heading", config.practice_heading || defaultConfig.practice_heading]
+        ])
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const angleSlider = document.getElementById('angle-slider');
+      if (angleSlider) {
+        angleSlider.addEventListener('input', drawInteractiveCanvas);
+      }
+      
+      drawElevationDiagram();
+      drawDepressionDiagram();
+      drawInteractiveCanvas();
+      initializeProblems();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b1c2cc653a48b03',t:'MTc2NjM3MDM5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
