@@ -1,511 +1,1842 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="en">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heights and Distances Explorer</title>
+  <title>Heights and Distances - Interactive Guide</title>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      box-sizing: border-box;
-    }
-    
-    .concept-card {
-      transition: all 0.3s ease;
-    }
-    
-    .concept-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    }
-    
-    .formula-box {
-      transition: all 0.3s ease;
-    }
-    
-    .formula-box:hover {
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .slider-btn:hover {
-      opacity: 0.9;
-    }
-
-    .show-solution-btn:hover {
-      opacity: 0.9;
-    }
-
-    canvas {
-      border-radius: 8px;
-    }
-  </style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body, .main-wrapper {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .main-wrapper {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-auto;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .nav-btn {
+            background: #ffffff;
+            color: #667eea;
+            border: 3px solid #667eea;
+            padding: 14px 35px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn.active {
+            background: #667eea;
+            color: #ffffff;
+        }
+        
+        .nav-btn:hover {
+            background: #667eea;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .concept {
+            margin-bottom: 25px;
+        }
+        
+        .concept h3 {
+            color: #764ba2;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        
+        .concept p {
+            color: #444444;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+        
+        .visual-demo {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            position: relative;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .formula-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .formula-box strong {
+            color: #856404;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: #333333;
+            background: #ffffff;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: inline-block;
+        }
+        
+        .key-points {
+            background: #e7f3ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .key-points h4 {
+            color: #0066cc;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .key-points li {
+            color: #333333;
+            font-size: 15px;
+            line-height: 1.8;
+            padding-left: 25px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        
+        .key-points li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #0066cc;
+            font-weight: bold;
+        }
+        
+        .interactive-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 2px solid #667eea;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group label {
+            display: block;
+            color: #333333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .control-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: #ffffff;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #ffffff;
+            color: #667eea;
+            border: 2px solid #667eea;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+        
+        .result-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .result-box h4 {
+            color: #155724;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .result-box p {
+            color: #155724;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .problem-card {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e0e7ff;
+            transition: all 0.3s;
+        }
+        
+        .problem-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .problem-card h3 {
+            color: #667eea;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .problem-scenario {
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 8px;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        .solution-steps {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .solution-steps h5 {
+            color: #667eea;
+            font-size: 17px;
+            margin-bottom: 12px;
+        }
+        
+        .step {
+            color: #333333;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .step:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .answer-highlight {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #28a745;
+            margin-top: 15px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #155724;
+        }
+        
+        .hint-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #ffc107;
+            margin-top: 15px;
+            font-size: 15px;
+            color: #856404;
+        }
+        
+        .difficulty-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .difficulty-easy {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .difficulty-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .difficulty-hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body class="h-full">
-  <div id="app-container" class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-   <div class="min-h-full px-4 py-8 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto"><!-- Header -->
-     <div class="text-center mb-8" style="background: #ffffff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-      <h1 id="main-title" class="mb-2" style="font-family: 'Georgia', serif; font-size: 48px; font-weight: bold; color: #1a202c;">Heights and Distances</h1>
-      <p id="subtitle" style="font-family: 'Arial', sans-serif; font-size: 20px; color: #4a5568;">Master Trigonometry Applications for ICSE Class 10</p>
-     </div><!-- Key Concepts Section -->
-     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-      <h2 id="concepts-heading" class="mb-6" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">📚 Key Concepts</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"><!-- Angle of Elevation -->
-       <div class="concept-card" style="background: #ebf8ff; border-radius: 12px; padding: 20px; border: 2px solid #4299e1;">
-        <h3 class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: 600; color: #2d3748;">📐 Angle of Elevation</h3>
-        <p class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6;">The angle formed between the horizontal line and the line of sight when looking <strong>upward</strong> at an object.</p>
-        <canvas id="elevation-canvas" width="280" height="180" style="width: 100%; max-width: 280px; height: auto; background: #ffffff;"></canvas>
-       </div><!-- Angle of Depression -->
-       <div class="concept-card" style="background: #fef5e7; border-radius: 12px; padding: 20px; border: 2px solid #f59e0b;">
-        <h3 class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: 600; color: #2d3748;">📉 Angle of Depression</h3>
-        <p class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6;">The angle formed between the horizontal line and the line of sight when looking <strong>downward</strong> at an object.</p>
-        <canvas id="depression-canvas" width="280" height="180" style="width: 100%; max-width: 280px; height: auto; background: #ffffff;"></canvas>
+ <body>
+  <div class="main-wrapper">
+   <div class="container">
+    <div class="header">
+     <h1 id="main-title">📐 Heights and Distances</h1>
+     <p id="intro-text">Master trigonometry applications in real-world problems</p>
+    </div>
+    <div class="nav-buttons"><button class="nav-btn active" onclick="showPage('learn')">📚 Learn Concepts</button> <button class="nav-btn" onclick="showPage('practice')">🎯 Practice Problems</button> <button class="nav-btn" onclick="showPage('quiz')">📝 Take Quiz</button>
+    </div><!-- LEARN PAGE -->
+    <div id="learn-page" class="page active">
+     <div class="section">
+      <h2>🎯 What are Heights and Distances?</h2>
+      <div class="concept">
+       <p>Heights and Distances is the practical application of trigonometry to find heights of objects (like buildings, towers, trees) or distances between objects when direct measurement isn't possible. We use angles and trigonometric ratios to solve these problems!</p>
+      </div>
+      <div class="key-points">
+       <h4>Why is this important?</h4>
+       <ul>
+        <li>Used by surveyors to measure land and buildings</li>
+        <li>Helps pilots calculate flight paths and landing angles</li>
+        <li>Essential for architects and construction engineers</li>
+        <li>Navigation and GPS technology rely on these principles</li>
+       </ul>
+      </div>
+     </div>
+     <div class="section">
+      <h2>�� Key Concepts</h2>
+      <div class="concept">
+       <h3 id="angle-label">1️⃣ Angle of Elevation</h3>
+       <p>The angle formed between the horizontal line (eye level) and the line of sight when looking UP at an object above you.</p>
+       <div class="visual-demo">
+        <svg width="400" height="280" viewbox="0 0 400 280" style="max-width: 100%; height: auto;"><line x1="50" y1="240" x2="350" y2="240" stroke="#333" stroke-width="3" /> <rect x="280" y="80" width="60" height="160" fill="#8B4513" stroke="#654321" stroke-width="2" /> <rect x="290" y="100" width="15" height="20" fill="#87CEEB" /> <rect x="315" y="100" width="15" height="20" fill="#87CEEB" /> <rect x="290" y="140" width="15" height="20" fill="#87CEEB" /> <rect x="315" y="140" width="15" height="20" fill="#87CEEB" /> <rect x="290" y="180" width="15" height="20" fill="#87CEEB" /> <rect x="315" y="180" width="15" height="20" fill="#87CEEB" /> <circle cx="80" cy="220" r="15" fill="#FFD700" /> <line x1="80" y1="235" x2="80" y2="270" stroke="#333" stroke-width="3" /> <line x1="80" y1="220" x2="280" y2="220" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="5,5" /> <text x="170" y="215" fill="#FF6B6B" font-size="14" font-weight="bold">
+          Horizontal Line
+         </text> <line x1="80" y1="220" x2="280" y2="80" stroke="#4ECDC4" stroke-width="3" /> <text x="150" y="140" fill="#4ECDC4" font-size="14" font-weight="bold">
+          Line of Sight
+         </text> <path d="M 140 220 Q 130 210 120 200" fill="none" stroke="#667eea" stroke-width="3" /> <text x="125" y="210" fill="#667eea" font-size="16" font-weight="bold">
+          θ
+         </text> <line x1="280" y1="80" x2="280" y2="240" stroke="#9B59B6" stroke-width="2" stroke-dasharray="5,5" /> <text x="250" y="160" fill="#9B59B6" font-size="14" font-weight="bold">
+          Height (h)
+         </text> <line x1="80" y1="250" x2="280" y2="250" stroke="#E67E22" stroke-width="2" /> <text x="150" y="268" fill="#E67E22" font-size="14" font-weight="bold">
+          Distance (d)
+         </text>
+        </svg>
        </div>
-      </div>
-      <div class="p-4" style="background: #e6fffa; border-radius: 12px; border-left: 4px solid #38b2ac;">
-       <p style="font-family: 'Arial', sans-serif; font-size: 16px; color: #2d3748; line-height: 1.6;"><strong>Important:</strong> The angle of elevation from point A to B equals the angle of depression from point B to A (alternate angles).</p>
-      </div>
-     </div><!-- Interactive Visualizer -->
-     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-      <h2 class="mb-4" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">🎯 Interactive Angle Visualizer</h2>
-      <div class="mb-4"><label for="angle-slider" class="block mb-2" style="font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 600; color: #4a5568;"> Angle of Elevation: <span id="angle-value" style="color: #4facfe; font-size: 20px;">30</span>° </label> <input type="range" id="angle-slider" min="10" max="80" value="30" class="w-full" style="cursor: pointer;">
-      </div>
-      <div class="text-center">
-       <canvas id="interactive-canvas" width="500" height="350" style="max-width: 100%; height: auto; background: #f7fafc; border: 2px solid #e2e8f0;"></canvas>
-      </div>
-      <div class="mt-4 grid grid-cols-3 gap-4">
-       <div class="text-center p-3" style="background: #ebf8ff; border-radius: 8px;">
-        <p style="font-family: 'Arial', sans-serif; font-size: 14px; color: #4a5568;">Height</p>
-        <p id="height-display" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; color: #4facfe;">50</p>
-       </div>
-       <div class="text-center p-3" style="background: #fef5e7; border-radius: 8px;">
-        <p style="font-family: 'Arial', sans-serif; font-size: 14px; color: #4a5568;">Distance</p>
-        <p id="distance-display" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; color: #f59e0b;">86.6</p>
-       </div>
-       <div class="text-center p-3" style="background: #e6fffa; border-radius: 8px;">
-        <p style="font-family: 'Arial', sans-serif; font-size: 14px; color: #4a5568;">Hypotenuse</p>
-        <p id="hypotenuse-display" style="font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; color: #38b2ac;">100</p>
-       </div>
-      </div>
-     </div><!-- Key Formulas -->
-     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-      <h2 id="formula-heading" class="mb-4" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">📐 Essential Formulas</h2>
-      <div class="space-y-4">
-       <div class="formula-box p-4" style="background: #f7fafc; border-radius: 12px; border: 2px solid #e2e8f0;">
-        <h3 class="mb-2" style="font-family: 'Arial', sans-serif; font-size: 18px; font-weight: 600; color: #2d3748;">Trigonometric Ratios:</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-         <p class="text-center py-2" style="font-family: 'Georgia', serif; font-size: 18px; color: #4facfe;">sin θ = Opposite / Hypotenuse</p>
-         <p class="text-center py-2" style="font-family: 'Georgia', serif; font-size: 18px; color: #4facfe;">cos θ = Adjacent / Hypotenuse</p>
-         <p class="text-center py-2" style="font-family: 'Georgia', serif; font-size: 18px; color: #4facfe;">tan θ = Opposite / Adjacent</p>
+       <div class="formula-box"><strong>Formula:</strong>
+        <div class="formula">
+         tan θ = Height / Distance
         </div>
-       </div>
-       <div class="formula-box p-4" style="background: #f7fafc; border-radius: 12px; border: 2px solid #e2e8f0;">
-        <h3 class="mb-2" style="font-family: 'Arial', sans-serif; font-size: 18px; font-weight: 600; color: #2d3748;">Common Height-Distance Formulas:</h3>
-        <div class="space-y-2">
-         <p class="py-1" style="font-family: 'Georgia', serif; font-size: 16px; color: #718096;">Height = Distance × tan(angle)</p>
-         <p class="py-1" style="font-family: 'Georgia', serif; font-size: 16px; color: #718096;">Distance = Height / tan(angle)</p>
-         <p class="py-1" style="font-family: 'Georgia', serif; font-size: 16px; color: #718096;">Distance = Height × cot(angle)</p>
+        <div class="formula">
+         Height = Distance × tan θ
         </div>
        </div>
       </div>
-     </div><!-- Practice Problems -->
-     <div class="mb-6" style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-      <h2 id="practice-heading" class="mb-4" style="font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #2d3748;">✏️ Practice Problems</h2>
-      <div id="problems-container" class="space-y-4"><!-- Problems will be added here -->
+      <div class="concept">
+       <h3 id="depression-label">2️⃣ Angle of Depression</h3>
+       <p>The angle formed between the horizontal line and the line of sight when looking DOWN at an object below you.</p>
+       <div class="visual-demo">
+        <svg width="400" height="280" viewbox="0 0 400 280" style="max-width: 100%; height: auto;"><line x1="50" y1="240" x2="350" y2="240" stroke="#333" stroke-width="3" /> <rect x="80" y="80" width="50" height="160" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2" /> <polygon points="80,80 105,50 130,80" fill="#e74c3c" stroke="#c0392b" stroke-width="2" /> <circle cx="105" cy="90" r="12" fill="#FFD700" /> <rect x="280" y="220" width="30" height="20" fill="#3498db" /> <polygon points="280,220 295,200 310,220" fill="#2980b9" /> <line x1="105" y1="90" x2="300" y2="90" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="5,5" /> <text x="190" y="80" fill="#FF6B6B" font-size="14" font-weight="bold">
+          Horizontal Line
+         </text> <line x1="105" y1="90" x2="295" y2="220" stroke="#4ECDC4" stroke-width="3" /> <text x="190" y="160" fill="#4ECDC4" font-size="14" font-weight="bold">
+          Line of Sight
+         </text> <path d="M 160 90 Q 150 110 140 130" fill="none" stroke="#667eea" stroke-width="3" /> <text x="155" y="115" fill="#667eea" font-size="16" font-weight="bold">
+          θ
+         </text> <line x1="295" y1="90" x2="295" y2="220" stroke="#9B59B6" stroke-width="2" stroke-dasharray="5,5" /> <text x="305" y="155" fill="#9B59B6" font-size="14" font-weight="bold">
+          Height (h)
+         </text> <line x1="105" y1="250" x2="295" y2="250" stroke="#E67E22" stroke-width="2" /> <text x="175" y="268" fill="#E67E22" font-size="14" font-weight="bold">
+          Distance (d)
+         </text>
+        </svg>
+       </div>
+       <div class="formula-box"><strong>Formula:</strong>
+        <div class="formula">
+         tan θ = Height / Distance
+        </div>
+        <div class="formula">
+         Distance = Height / tan θ
+        </div>
+       </div>
       </div>
+      <div class="key-points">
+       <h4>🔑 Important Note:</h4>
+       <ul>
+        <li>Angle of elevation = Angle of depression (when measured from same horizontal line)</li>
+        <li>Always draw a clear diagram before solving</li>
+        <li>Identify the right triangle formed in the problem</li>
+        <li>Choose the correct trigonometric ratio (sin, cos, or tan)</li>
+       </ul>
+      </div>
+     </div>
+     <div class="section">
+      <h2>📝 Common Formulas</h2>
+      <div class="formula-box"><strong>Basic Trigonometric Ratios:</strong>
+       <div class="formula">
+        sin θ = Opposite / Hypotenuse
+       </div>
+       <div class="formula">
+        cos θ = Adjacent / Hypotenuse
+       </div>
+       <div class="formula">
+        tan θ = Opposite / Adjacent = sin θ / cos θ
+       </div>
+      </div>
+      <div class="formula-box"><strong>For Heights and Distances:</strong>
+       <div class="formula">
+        Height = Distance × tan(angle of elevation)
+       </div>
+       <div class="formula">
+        Distance = Height / tan(angle of elevation)
+       </div>
+       <div class="formula">
+        Distance = Height / tan(angle of depression)
+       </div>
+      </div>
+     </div>
+     <div class="section">
+      <h2>🧮 Quick Calculator</h2>
+      <p style="color: #666; margin-bottom: 20px;">Try solving a sample problem: Find the height of a building given the angle of elevation and distance!</p>
+      <div class="interactive-section">
+       <div class="control-group"><label for="distance-input">Distance from building (in meters):</label> <input type="number" id="distance-input" placeholder="e.g., 50" min="1">
+       </div>
+       <div class="control-group"><label for="angle-input">Angle of elevation (in degrees):</label> <input type="number" id="angle-input" placeholder="e.g., 30" min="1" max="89">
+       </div><button class="btn" onclick="calculateHeight()">Calculate Height</button>
+       <div class="result-box" id="result-box">
+        <h4>📊 Solution:</h4>
+        <p id="result-text"></p>
+       </div>
+      </div>
+     </div>
+     <div class="section">
+      <h2>💡 Tips for ICSE Exam</h2>
+      <div class="key-points">
+       <ul>
+        <li>Always convert angles to the same unit (degrees or radians)</li>
+        <li>Make sure your calculator is in the correct mode (DEG mode for degrees)</li>
+        <li>Draw neat, labeled diagrams for full marks</li>
+        <li>Write the formula before substituting values</li>
+        <li>Show all steps clearly in your solution</li>
+        <li>Check if the answer makes practical sense</li>
+        <li>Practice problems with different scenarios: towers, buildings, ships, airplanes</li>
+       </ul>
+      </div>
+     </div>
+    </div><!-- PRACTICE PAGE -->
+    <div id="practice-page" class="page">
+     <div class="section">
+      <h2>🎯 Interactive Practice Problems</h2>
+      <p style="color: #666; margin-bottom: 20px;">Solve these ICSE-style problems and check your answers with step-by-step solutions!</p><!-- Problem 1: Building Height -->
+      <div class="problem-card">
+       <h3>Problem 1: The Tall Building <span class="difficulty-badge difficulty-easy">Easy</span></h3>
+       <div class="problem-scenario">
+        📍 A person standing on the ground observes the top of a building at an angle of elevation of 60°. The person is standing 30 meters away from the base of the building. Find the height of the building.
+       </div>
+       <div class="control-group"><label for="p1-answer">Your Answer (in meters):</label> <input type="number" id="p1-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem1()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(1)">💡 Show Hint</button>
+       <div id="p1-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Use tan θ = Height / Distance. Here, θ = 60° and distance = 30 m. Remember: tan 60° = √3 ≈ 1.732
+       </div>
+       <div id="p1-solution" class="result-box">
+        <div id="p1-result"></div>
+       </div>
+      </div><!-- Problem 2: Ladder Problem -->
+      <div class="problem-card">
+       <h3>Problem 2: The Ladder <span class="difficulty-badge difficulty-easy">Easy</span></h3>
+       <div class="problem-scenario">
+        🪜 A ladder 15 meters long leans against a wall and makes an angle of 60° with the ground. Find the height at which the ladder touches the wall.
+       </div>
+       <div class="control-group"><label for="p2-answer">Your Answer (in meters):</label> <input type="number" id="p2-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem2()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(2)">💡 Show Hint</button>
+       <div id="p2-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Use sin θ = Height / Hypotenuse. Here, hypotenuse (ladder) = 15 m and θ = 60°. Remember: sin 60° = √3/2 ≈ 0.866
+       </div>
+       <div id="p2-solution" class="result-box">
+        <div id="p2-result"></div>
+       </div>
+      </div><!-- Problem 3: Two Angles -->
+      <div class="problem-card">
+       <h3>Problem 3: Two Observations <span class="difficulty-badge difficulty-medium">Medium</span></h3>
+       <div class="problem-scenario">
+        🏢 From a point on the ground, the angle of elevation of the top of a tower is 30°. On walking 20 meters towards the tower, the angle of elevation becomes 60°. Find the height of the tower.
+       </div>
+       <div class="control-group"><label for="p3-answer">Your Answer (in meters):</label> <input type="number" id="p3-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem3()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(3)">💡 Show Hint</button>
+       <div id="p3-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Let height = h. From first position: h/(x+20) = tan 30°. From second position: h/x = tan 60°. Solve these two equations to find h.
+       </div>
+       <div id="p3-solution" class="result-box">
+        <div id="p3-result"></div>
+       </div>
+      </div><!-- Problem 4: Depression Angle -->
+      <div class="problem-card">
+       <h3>Problem 4: From the Lighthouse <span class="difficulty-badge difficulty-medium">Medium</span></h3>
+       <div class="problem-scenario">
+        🗼 From the top of a lighthouse 100 meters high, the angle of depression of a ship is 30°. Find the distance of the ship from the base of the lighthouse.
+       </div>
+       <div class="control-group"><label for="p4-answer">Your Answer (in meters):</label> <input type="number" id="p4-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem4()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(4)">💡 Show Hint</button>
+       <div id="p4-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Angle of depression = Angle of elevation from the ship. Use tan 30° = Height / Distance. Height = 100 m. Remember: tan 30° = 1/√3
+       </div>
+       <div id="p4-solution" class="result-box">
+        <div id="p4-result"></div>
+       </div>
+      </div><!-- Problem 5: Shadow Problem -->
+      <div class="problem-card">
+       <h3>Problem 5: The Shadow Mystery <span class="difficulty-badge difficulty-hard">Hard</span></h3>
+       <div class="problem-scenario">
+        🌳 A tree casts a shadow 10√3 meters long when the angle of elevation of the sun is 30°. When the angle of elevation becomes 60°, what will be the length of the shadow?
+       </div>
+       <div class="control-group"><label for="p5-answer">Your Answer (in meters):</label> <input type="number" id="p5-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem5()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(5)">💡 Show Hint</button>
+       <div id="p5-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> First find the height of the tree using the first condition. Then use that height with the new angle (60°) to find the new shadow length.
+       </div>
+       <div id="p5-solution" class="result-box">
+        <div id="p5-result"></div>
+       </div>
+      </div><!-- Problem 6: Bridge Problem -->
+      <div class="problem-card">
+       <h3>Problem 6: The River Bridge <span class="difficulty-badge difficulty-medium">Medium</span></h3>
+       <div class="problem-scenario">
+        🌉 From a point on a bridge across a river, the angles of depression of the banks on opposite sides of the river are 30° and 45°. If the bridge is 10 meters high, find the width of the river.
+       </div>
+       <div class="control-group"><label for="p6-answer">Your Answer (in meters):</label> <input type="number" id="p6-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem6()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(6)">💡 Show Hint</button>
+       <div id="p6-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Find distance to each bank separately using tan 30° and tan 45°. Width = distance to first bank + distance to second bank.
+       </div>
+       <div id="p6-solution" class="result-box">
+        <div id="p6-result"></div>
+       </div>
+      </div><!-- Problem 7: Airplane Problem -->
+      <div class="problem-card">
+       <h3>Problem 7: The Airplane <span class="difficulty-badge difficulty-medium">Medium</span></h3>
+       <div class="problem-scenario">
+        ✈️ An airplane is flying at a height of 300 meters above the ground. The angle of elevation from a point on the ground to the airplane is 60°. After some time, the angle of elevation reduces to 30°. How far has the airplane traveled horizontally?
+       </div>
+       <div class="control-group"><label for="p7-answer">Your Answer (in meters):</label> <input type="number" id="p7-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem7()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(7)">💡 Show Hint</button>
+       <div id="p7-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Find horizontal distance at 60° and at 30°. The difference is how far the plane traveled. Use: Distance = Height / tan(angle)
+       </div>
+       <div id="p7-solution" class="result-box">
+        <div id="p7-result"></div>
+       </div>
+      </div><!-- Problem 8: Two Buildings -->
+      <div class="problem-card">
+       <h3>Problem 8: Two Buildings <span class="difficulty-badge difficulty-hard">Hard</span></h3>
+       <div class="problem-scenario">
+        🏢🏢 From the top of a building 60 meters high, the angles of depression of the top and bottom of another building are 30° and 60° respectively. Find the height of the second building.
+       </div>
+       <div class="control-group"><label for="p8-answer">Your Answer (in meters):</label> <input type="number" id="p8-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem8()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(8)">💡 Show Hint</button>
+       <div id="p8-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> First find the horizontal distance using the 60° angle to the bottom. Then find the vertical distance from your position to the top of the second building using 30°.
+       </div>
+       <div id="p8-solution" class="result-box">
+        <div id="p8-result"></div>
+       </div>
+      </div><!-- Problem 9: Flagpole Problem -->
+      <div class="problem-card">
+       <h3>Problem 9: The Flagpole <span class="difficulty-badge difficulty-easy">Easy</span></h3>
+       <div class="problem-scenario">
+        🚩 A flagpole stands vertically on the ground. From a point 20 meters away from its base, the angle of elevation to the top is 45°. Find the height of the flagpole.
+       </div>
+       <div class="control-group"><label for="p9-answer">Your Answer (in meters):</label> <input type="number" id="p9-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem9()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(9)">💡 Show Hint</button>
+       <div id="p9-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Use tan 45° = Height / Distance. Remember: tan 45° = 1
+       </div>
+       <div id="p9-solution" class="result-box">
+        <div id="p9-result"></div>
+       </div>
+      </div><!-- Problem 10: Mountain Peak -->
+      <div class="problem-card">
+       <h3>Problem 10: Mountain Peak <span class="difficulty-badge difficulty-hard">Hard</span></h3>
+       <div class="problem-scenario">
+        ⛰️ A person observes the top of a mountain at an angle of elevation of 30°. After walking 500 meters towards the mountain on level ground, the angle of elevation becomes 45°. Find the height of the mountain.
+       </div>
+       <div class="control-group"><label for="p10-answer">Your Answer (in meters):</label> <input type="number" id="p10-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem10()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(10)">💡 Show Hint</button>
+       <div id="p10-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Let height = h. From first position: h/(x+500) = tan 30°. From second position: h/x = tan 45° = 1. Solve for h.
+       </div>
+       <div id="p10-solution" class="result-box">
+        <div id="p10-result"></div>
+       </div>
+      </div><!-- Problem 11: Kite Problem -->
+      <div class="problem-card">
+       <h3>Problem 11: Flying Kite <span class="difficulty-badge difficulty-easy">Easy</span></h3>
+       <div class="problem-scenario">
+        🪁 A kite is flying with a string of length 150 meters. If the string makes an angle of 60° with the horizontal ground, find the height of the kite above the ground (assume the string is taut).
+       </div>
+       <div class="control-group"><label for="p11-answer">Your Answer (in meters):</label> <input type="number" id="p11-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem11()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(11)">💡 Show Hint</button>
+       <div id="p11-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Use sin 60° = Height / String length. Remember: sin 60° = √3/2
+       </div>
+       <div id="p11-solution" class="result-box">
+        <div id="p11-result"></div>
+       </div>
+      </div><!-- Problem 12: Statue on Pillar -->
+      <div class="problem-card">
+       <h3>Problem 12: Statue on Pillar <span class="difficulty-badge difficulty-hard">Hard</span></h3>
+       <div class="problem-scenario">
+        🗿 A statue stands on top of a pillar. From a point on the ground at a distance of 25 meters from the base, the angles of elevation of the top and bottom of the statue are 60° and 45° respectively. Find the height of the statue.
+       </div>
+       <div class="control-group"><label for="p12-answer">Your Answer (in meters):</label> <input type="number" id="p12-answer" placeholder="Enter your answer" step="0.01">
+       </div><button class="btn" onclick="checkProblem12()">Check Answer</button> <button class="btn btn-secondary" onclick="showHint(12)">💡 Show Hint</button>
+       <div id="p12-hint" class="hint-box" style="display: none;"><strong>Hint:</strong> Find total height (to top of statue) using 60° angle. Find pillar height using 45° angle. Statue height = Total height - Pillar height.
+       </div>
+       <div id="p12-solution" class="result-box">
+        <div id="p12-result"></div>
+       </div>
+      </div><!-- Custom Problem Solver -->
+      <div class="problem-card" style="border: 3px solid #667eea;">
+       <h3>🎨 Create Your Own Problem</h3>
+       <div class="problem-scenario">
+        Design your own height and distance problem by entering the values below!
+       </div>
+       <div class="input-row">
+        <div class="control-group"><label for="custom-distance">Distance (meters):</label> <input type="number" id="custom-distance" placeholder="e.g., 40" min="1">
+        </div>
+        <div class="control-group"><label for="custom-angle">Angle (degrees):</label> <input type="number" id="custom-angle" placeholder="e.g., 45" min="1" max="89">
+        </div>
+       </div>
+       <div class="control-group"><label>Problem Type:</label> <select id="custom-type" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;"> <option value="elevation">Angle of Elevation (Find Height)</option> <option value="depression">Angle of Depression (Find Distance)</option> </select>
+       </div><button class="btn" onclick="solveCustomProblem()">Solve Problem</button>
+       <div id="custom-solution" class="result-box">
+        <div id="custom-result"></div>
+       </div>
+      </div>
+     </div>
+    </div><!-- QUIZ PAGE -->
+    <div id="quiz-page" class="page">
+     <div class="section">
+      <h2>📝 Heights and Distances Quiz</h2>
+      <p style="color: #666; margin-bottom: 20px;">Test your understanding with this comprehensive quiz! Includes Multiple Choice Questions (MCQs) and Descriptive Problems.</p>
+      <div class="key-points" style="background: #fff3cd;">
+       <h4>📋 Quiz Instructions:</h4>
+       <ul>
+        <li>Part A: 8 Multiple Choice Questions (1 mark each)</li>
+        <li>Part B: 4 Descriptive Problems (5 marks each)</li>
+        <li>Show all working for descriptive problems</li>
+        <li>Total: 28 marks | Time: 45 minutes</li>
+       </ul>
+      </div>
+     </div><!-- PART A: MCQ Section -->
+     <div class="section">
+      <h2>📊 Part A: Multiple Choice Questions (8 marks)</h2><!-- MCQ 1 -->
+      <div class="problem-card">
+       <h3>Question 1</h3>
+       <div class="problem-scenario">
+        The angle formed when looking UP at an object is called:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq1" value="A"> A) Angle of depression </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq1" value="B"> B) Angle of elevation </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq1" value="C"> C) Complementary angle </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq1" value="D"> D) Vertical angle </label>
+       </div>
+      </div><!-- MCQ 2 -->
+      <div class="problem-card">
+       <h3>Question 2</h3>
+       <div class="problem-scenario">
+        If tan θ = 1, then θ equals:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq2" value="A"> A) 30° </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq2" value="B"> B) 45° </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq2" value="C"> C) 60° </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq2" value="D"> D) 90° </label>
+       </div>
+      </div><!-- MCQ 3 -->
+      <div class="problem-card">
+       <h3>Question 3</h3>
+       <div class="problem-scenario">
+        A ladder 10 m long reaches a window 8 m high. The angle the ladder makes with the ground is:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq3" value="A"> A) sin⁻¹(0.8) </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq3" value="B"> B) cos⁻¹(0.8) </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq3" value="C"> C) tan⁻¹(0.8) </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq3" value="D"> D) sin⁻¹(0.6) </label>
+       </div>
+      </div><!-- MCQ 4 -->
+      <div class="problem-card">
+       <h3>Question 4</h3>
+       <div class="problem-scenario">
+        From the top of a tower 50 m high, the angle of depression of an object is 30°. The distance of the object from the base of the tower is:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq4" value="A"> A) 25 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq4" value="B"> B) 50√3 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq4" value="C"> C) 50/√3 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq4" value="D"> D) 100 m </label>
+       </div>
+      </div><!-- MCQ 5 -->
+      <div class="problem-card">
+       <h3>Question 5</h3>
+       <div class="problem-scenario">
+        The value of tan 60° is:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq5" value="A"> A) 1/√3 </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq5" value="B"> B) √3/2 </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq5" value="C"> C) √3 </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq5" value="D"> D) 1 </label>
+       </div>
+      </div><!-- MCQ 6 -->
+      <div class="problem-card">
+       <h3>Question 6</h3>
+       <div class="problem-scenario">
+        If the height of a tower is 20 m and the angle of elevation from a point is 45°, then the distance from the point to the base is:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq6" value="A"> A) 10 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq6" value="B"> B) 20 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq6" value="C"> C) 20√2 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq6" value="D"> D) 40 m </label>
+       </div>
+      </div><!-- MCQ 7 -->
+      <div class="problem-card">
+       <h3>Question 7</h3>
+       <div class="problem-scenario">
+        The angle of elevation and angle of depression from the same horizontal line are:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq7" value="A"> A) Supplementary angles </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq7" value="B"> B) Complementary angles </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq7" value="C"> C) Equal angles </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq7" value="D"> D) Vertically opposite angles </label>
+       </div>
+      </div><!-- MCQ 8 -->
+      <div class="problem-card">
+       <h3>Question 8</h3>
+       <div class="problem-scenario">
+        A person standing 30 m away from a building observes the top at an angle of 30°. If the person's eye level is 1.5 m from the ground, the height of the building is approximately:
+       </div>
+       <div style="margin-top: 15px;"><label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq8" value="A"> A) 17.3 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq8" value="B"> B) 18.8 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq8" value="C"> C) 20.3 m </label> <label style="display: block; margin: 10px 0; cursor: pointer;"> <input type="radio" name="mcq8" value="D"> D) 15.8 m </label>
+       </div>
+      </div><button class="btn" onclick="checkMCQAnswers()" style="margin-top: 20px;">Submit MCQ Answers</button>
+      <div id="mcq-results" class="result-box">
+       <div id="mcq-score"></div>
+      </div>
+     </div><!-- PART B: Descriptive Problems -->
+     <div class="section">
+      <h2>✍️ Part B: Descriptive Problems (20 marks)</h2>
+      <p style="color: #666; margin-bottom: 20px;">Solve the following problems showing all steps. Enter your final answer to check if it's correct.</p><!-- Descriptive Problem 1 -->
+      <div class="problem-card" style="border: 2px solid #667eea;">
+       <h3>Problem 1 (5 marks)</h3>
+       <div class="problem-scenario">
+        📐 <strong>A tower stands vertically on the ground. From a point on the ground, which is 15 m away from the foot of the tower, the angle of elevation of the top of the tower is found to be 60°. Find the height of the tower. (Take √3 = 1.732)</strong>
+       </div>
+       <div class="control-group" style="margin-top: 20px;"><label for="desc1-answer">Your Answer (in meters):</label> <input type="number" id="desc1-answer" placeholder="Enter final answer" step="0.01">
+       </div><button class="btn" onclick="checkDescriptive(1)">Check Answer</button> <button class="btn btn-secondary" onclick="showDescSolution(1)">Show Full Solution</button>
+       <div id="desc1-solution" class="solution-steps" style="display: none; margin-top: 20px; background: #f8f9ff; padding: 20px; border-radius: 8px;">
+        <h5 style="color: #667eea;">Complete Solution (5 marks):</h5>
+        <div class="step">
+         <strong>[1 mark]</strong> Given: Distance from tower = 15 m, Angle of elevation = 60°
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> Let height of tower = h meters
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> Using trigonometry: tan 60° = h / 15
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> √3 = h / 15 → h = 15√3
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> h = 15 × 1.732 = 25.98 meters
+        </div>
+        <div class="answer-highlight">
+         Final Answer: Height of tower = 25.98 meters (or 15√3 m)
+        </div>
+       </div>
+       <div id="desc1-result" class="result-box"></div>
+      </div><!-- Descriptive Problem 2 -->
+      <div class="problem-card" style="border: 2px solid #667eea;">
+       <h3>Problem 2 (5 marks)</h3>
+       <div class="problem-scenario">
+        🏛️ <strong>From the top of a building 60 m high, the angles of depression of the top and bottom of a lamp post are observed to be 30° and 60° respectively. Find the height of the lamp post.</strong>
+       </div>
+       <div class="control-group" style="margin-top: 20px;"><label for="desc2-answer">Your Answer (in meters):</label> <input type="number" id="desc2-answer" placeholder="Enter final answer" step="0.01">
+       </div><button class="btn" onclick="checkDescriptive(2)">Check Answer</button> <button class="btn btn-secondary" onclick="showDescSolution(2)">Show Full Solution</button>
+       <div id="desc2-solution" class="solution-steps" style="display: none; margin-top: 20px; background: #f8f9ff; padding: 20px; border-radius: 8px;">
+        <h5 style="color: #667eea;">Complete Solution (5 marks):</h5>
+        <div class="step">
+         <strong>[1 mark]</strong> Given: Building height = 60 m, Angles of depression = 30° and 60°
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> Let horizontal distance = d, lamp post height = h
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> For bottom of lamp: tan 60° = 60/d → d = 60/√3 = 20√3 m
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> For top of lamp: tan 30° = (60-h)/d → (60-h) = d/√3 = 20 m
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> 60 - h = 20 → h = 40 meters
+        </div>
+        <div class="answer-highlight">
+         Final Answer: Height of lamp post = 40 meters
+        </div>
+       </div>
+       <div id="desc2-result" class="result-box"></div>
+      </div><!-- Descriptive Problem 3 -->
+      <div class="problem-card" style="border: 2px solid #667eea;">
+       <h3>Problem 3 (5 marks)</h3>
+       <div class="problem-scenario">
+        🌉 <strong>A man on the deck of a ship is 10 m above water level. He observes that the angle of elevation of the top of a cliff is 45° and the angle of depression of the base of the cliff is 30°. Find the distance of the cliff from the ship and the height of the cliff.</strong>
+       </div>
+       <div class="control-group" style="margin-top: 20px;"><label for="desc3-answer">Distance of cliff from ship (in meters):</label> <input type="number" id="desc3-answer" placeholder="Enter distance" step="0.01">
+       </div>
+       <div class="control-group"><label for="desc3-answer2">Height of cliff (in meters):</label> <input type="number" id="desc3-answer2" placeholder="Enter height" step="0.01">
+       </div><button class="btn" onclick="checkDescriptive(3)">Check Answer</button> <button class="btn btn-secondary" onclick="showDescSolution(3)">Show Full Solution</button>
+       <div id="desc3-solution" class="solution-steps" style="display: none; margin-top: 20px; background: #f8f9ff; padding: 20px; border-radius: 8px;">
+        <h5 style="color: #667eea;">Complete Solution (5 marks):</h5>
+        <div class="step">
+         <strong>[1 mark]</strong> Given: Man's height above water = 10 m, Angles = 45° (elevation), 30° (depression)
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> For distance: tan 30° = 10/d → d = 10/tan(30°) = 10√3 m
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> d = 10 × 1.732 = 17.32 m
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> For height above man's level: tan 45° = h'/d → h' = 17.32 m
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> Total cliff height = 10 + 17.32 = 27.32 m
+        </div>
+        <div class="answer-highlight">
+         Final Answer: Distance = 17.32 m, Height of cliff = 27.32 m
+        </div>
+       </div>
+       <div id="desc3-result" class="result-box"></div>
+      </div><!-- Descriptive Problem 4 -->
+      <div class="problem-card" style="border: 2px solid #667eea;">
+       <h3>Problem 4 (5 marks)</h3>
+       <div class="problem-scenario">
+        🗼 <strong>The angle of elevation of the top of a tower from two points at distances of 4 m and 9 m from the base of the tower and in the same straight line with it are complementary. Find the height of the tower.</strong>
+       </div>
+       <div class="control-group" style="margin-top: 20px;"><label for="desc4-answer">Your Answer (in meters):</label> <input type="number" id="desc4-answer" placeholder="Enter final answer" step="0.01">
+       </div><button class="btn" onclick="checkDescriptive(4)">Check Answer</button> <button class="btn btn-secondary" onclick="showDescSolution(4)">Show Full Solution</button>
+       <div id="desc4-solution" class="solution-steps" style="display: none; margin-top: 20px; background: #f8f9ff; padding: 20px; border-radius: 8px;">
+        <h5 style="color: #667eea;">Complete Solution (5 marks):</h5>
+        <div class="step">
+         <strong>[1 mark]</strong> Given: Distances = 4 m and 9 m, Angles are complementary (α + β = 90°)
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> Let height = h, angles be α and β. Then tan α = h/4 and tan β = h/9
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> Since angles are complementary: tan α × tan β = 1
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> (h/4) × (h/9) = 1 → h²/36 = 1 → h² = 36
+        </div>
+        <div class="step">
+         <strong>[1 mark]</strong> h = 6 meters
+        </div>
+        <div class="answer-highlight">
+         Final Answer: Height of tower = 6 meters
+        </div>
+       </div>
+       <div id="desc4-result" class="result-box"></div>
+      </div>
+     </div>
+     <div class="section">
+      <h2>🎯 Quiz Summary</h2>
+      <div id="quiz-summary" style="display: none;">
+       <div class="key-points">
+        <h4>Your Performance:</h4>
+        <ul id="summary-list"></ul>
+       </div>
+      </div><button class="btn" onclick="showQuizSummary()" style="width: 100%;">View Overall Performance</button>
      </div>
     </div>
    </div>
   </div>
   <script>
-    const defaultConfig = {
-      main_title: "Heights and Distances",
-      subtitle: "Master Trigonometry Applications for ICSE Class 10",
-      concepts_heading: "📚 Key Concepts",
-      formula_heading: "📐 Essential Formulas",
-      practice_heading: "✏️ Practice Problems",
-      background_color: "#4facfe",
-      surface_color: "#ffffff",
-      text_color: "#2d3748",
-      primary_action_color: "#4facfe",
-      secondary_action_color: "#f59e0b"
-    };
-
-    let currentConfig = { ...defaultConfig };
-
-    const problems = [
-      {
-        question: "A tower is 50m high. From a point on the ground, the angle of elevation to the top of the tower is 30°. Find the distance of the point from the base of the tower.",
-        solution: "Given:\nHeight of tower (h) = 50m\nAngle of elevation (θ) = 30°\n\nLet distance from base = d\n\nUsing tan θ = h/d\ntan 30° = 50/d\n1/√3 = 50/d\nd = 50√3\nd = 50 × 1.732\nd = 86.6 m",
-        answer: "86.6 m"
-      },
-      {
-        question: "From the top of a 75m high lighthouse, the angle of depression of a ship is 45°. Find the distance of the ship from the base of the lighthouse.",
-        solution: "Given:\nHeight of lighthouse (h) = 75m\nAngle of depression = 45°\n\nNote: Angle of depression = Angle of elevation (alternate angles)\nSo, angle of elevation = 45°\n\nLet distance = d\n\nUsing tan θ = h/d\ntan 45° = 75/d\n1 = 75/d\nd = 75 m",
-        answer: "75 m"
-      },
-      {
-        question: "A ladder 20m long reaches a window 16m above the ground. Find the angle the ladder makes with the ground.",
-        solution: "Given:\nLength of ladder (hypotenuse) = 20m\nHeight of window (opposite) = 16m\n\nLet angle with ground = θ\n\nUsing sin θ = opposite/hypotenuse\nsin θ = 16/20\nsin θ = 0.8\nθ = sin⁻¹(0.8)\nθ ≈ 53.13°\n\nAlternatively:\nθ = sin⁻¹(4/5) ≈ 53° (or 53°8')",
-        answer: "53.13° or 53°8'"
-      },
-      {
-        question: "From a point on the ground, the angles of elevation of the bottom and top of a tower standing on a building 30m high are 45° and 60° respectively. Find the height of the tower.",
-        solution: "Given:\nHeight of building = 30m\nAngle to bottom of tower = 45°\nAngle to top of tower = 60°\n\nLet distance from building = d\nLet height of tower = h\n\nFrom angle to bottom:\ntan 45° = 30/d\n1 = 30/d\nd = 30m\n\nFrom angle to top:\ntan 60° = (30 + h)/d\n√3 = (30 + h)/30\n30√3 = 30 + h\nh = 30√3 - 30\nh = 30(√3 - 1)\nh = 30(1.732 - 1)\nh = 30 × 0.732\nh = 21.96 m ≈ 22m",
-        answer: "22 m"
-      },
-      {
-        question: "The shadow of a building is 20m when the angle of elevation of the sun is 60°. Find the height of the building.",
-        solution: "Given:\nLength of shadow (distance) = 20m\nAngle of elevation = 60°\n\nLet height of building = h\n\nUsing tan θ = h/d\ntan 60° = h/20\n√3 = h/20\nh = 20√3\nh = 20 × 1.732\nh = 34.64 m",
-        answer: "34.64 m"
-      },
-      {
-        question: "From the top of a cliff 100m high, the angles of depression of two boats in the same direction are 30° and 45°. Find the distance between the boats.",
-        solution: "Given:\nHeight of cliff (h) = 100m\nAngle of depression to boat 1 = 30°\nAngle of depression to boat 2 = 45°\n\nLet distance to boat 1 = d₁\nLet distance to boat 2 = d₂\n\nFor boat 1 (30° angle):\ntan 30° = 100/d₁\n1/√3 = 100/d₁\nd₁ = 100√3 = 173.2m\n\nFor boat 2 (45° angle):\ntan 45° = 100/d₂\n1 = 100/d₂\nd₂ = 100m\n\nDistance between boats = d₁ - d₂\n= 173.2 - 100\n= 73.2 m",
-        answer: "73.2 m"
-      },
-      {
-        question: "A man observes the angle of elevation of the top of a building to be 30°. He walks 50m towards the building and finds the angle of elevation to be 60°. Find the height of the building.",
-        solution: "Given:\nInitial angle = 30°\nFinal angle after walking 50m = 60°\n\nLet height = h\nLet initial distance = d\n\nFrom first position:\ntan 30° = h/d\n1/√3 = h/d\nd = h√3 ... (1)\n\nFrom second position:\ntan 60° = h/(d - 50)\n√3 = h/(d - 50)\nd - 50 = h/√3 ... (2)\n\nFrom (1): d = h√3\nSubstituting in (2):\nh√3 - 50 = h/√3\nh√3 - h/√3 = 50\nh(√3 - 1/√3) = 50\nh(3 - 1)/√3 = 50\n2h/√3 = 50\nh = 25√3\nh = 43.3 m",
-        answer: "43.3 m"
-      },
-      {
-        question: "The angle of elevation of the top of a tower from two points at distances 4m and 9m from the base in the same straight line are complementary. Find the height of the tower.",
-        solution: "Given:\nDistance 1 = 4m, angle = θ\nDistance 2 = 9m, angle = (90° - θ)\n(Complementary angles)\n\nLet height = h\n\nFrom first point:\ntan θ = h/4 ... (1)\n\nFrom second point:\ntan(90° - θ) = h/9\ncot θ = h/9\n1/tan θ = h/9 ... (2)\n\nFrom (1): tan θ = h/4\nFrom (2): 1/(h/4) = h/9\n4/h = h/9\n36 = h²\nh = 6 m",
-        answer: "6 m"
-      },
-      {
-        question: "From a point on a bridge across a river, the angles of depression of the banks on opposite sides are 30° and 45°. If the bridge is 10m above the banks, find the width of the river.",
-        solution: "Given:\nHeight of bridge = 10m\nAngle of depression to bank 1 = 30°\nAngle of depression to bank 2 = 45°\n\nLet distance to bank 1 = d₁\nLet distance to bank 2 = d₂\n\nFor bank 1 (30° angle):\ntan 30° = 10/d₁\n1/√3 = 10/d₁\nd₁ = 10√3 = 17.32m\n\nFor bank 2 (45° angle):\ntan 45° = 10/d₂\n1 = 10/d₂\nd₂ = 10m\n\nWidth of river = d₁ + d₂\n= 17.32 + 10\n= 27.32 m",
-        answer: "27.32 m"
-      },
-      {
-        question: "A vertical pole stands on level ground. From a point on the ground 25m from the base of the pole, the angle of elevation to the top is 45°. Find the height of the pole. If a flag of height 5m is placed on top of the pole, what will be the angle of elevation to the top of the flag from the same point?",
-        solution: "Part 1: Finding height of pole\nGiven: Distance = 25m, Angle = 45°\n\ntan 45° = h/25\n1 = h/25\nh = 25m\n\nPart 2: Angle to top of flag\nTotal height = 25 + 5 = 30m\nDistance = 25m\n\nLet new angle = α\ntan α = 30/25\ntan α = 6/5\ntan α = 1.2\nα = tan⁻¹(1.2)\nα ≈ 50.19°\n\nor α ≈ 50°11'",
-        answer: "Height: 25m, New angle: 50.19° or 50°11'"
-      }
-    ];
-
-    function getCurrentConfig() {
-      if (window.elementSdk && window.elementSdk.config) {
-        return window.elementSdk.config;
-      }
-      return currentConfig;
-    }
-
-    function drawElevationDiagram() {
-      const canvas = document.getElementById('elevation-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const config = getCurrentConfig();
-      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.strokeStyle = '#2d3748';
-      ctx.lineWidth = 2;
-      
-      ctx.beginPath();
-      ctx.moveTo(30, 150);
-      ctx.lineTo(250, 150);
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.moveTo(250, 150);
-      ctx.lineTo(250, 50);
-      ctx.stroke();
-      
-      ctx.strokeStyle = primaryColor;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(30, 150);
-      ctx.lineTo(250, 50);
-      ctx.stroke();
-      
-      ctx.fillStyle = primaryColor;
-      ctx.beginPath();
-      ctx.arc(30, 150, 25, 0, -Math.PI/6, true);
-      ctx.lineTo(30, 150);
-      ctx.closePath();
-      ctx.globalAlpha = 0.3;
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-      
-      ctx.fillStyle = '#2d3748';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('θ', 40, 145);
-      ctx.fillText('Object', 230, 40);
-      ctx.fillText('Observer', 10, 170);
-    }
-
-    function drawDepressionDiagram() {
-      const canvas = document.getElementById('depression-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const config = getCurrentConfig();
-      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.strokeStyle = '#2d3748';
-      ctx.lineWidth = 2;
-      
-      ctx.beginPath();
-      ctx.moveTo(30, 50);
-      ctx.lineTo(250, 50);
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.moveTo(250, 50);
-      ctx.lineTo(250, 150);
-      ctx.stroke();
-      
-      ctx.strokeStyle = secondaryColor;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(30, 50);
-      ctx.lineTo(250, 150);
-      ctx.stroke();
-      
-      ctx.fillStyle = secondaryColor;
-      ctx.beginPath();
-      ctx.arc(30, 50, 25, 0, Math.PI/6);
-      ctx.lineTo(30, 50);
-      ctx.closePath();
-      ctx.globalAlpha = 0.3;
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-      
-      ctx.fillStyle = '#2d3748';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('θ', 40, 65);
-      ctx.fillText('Observer', 5, 40);
-      ctx.fillText('Object', 230, 170);
-    }
-
-    function drawInteractiveCanvas() {
-      const canvas = document.getElementById('interactive-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const slider = document.getElementById('angle-slider');
-      const angle = parseInt(slider.value);
-      const angleRad = (angle * Math.PI) / 180;
-      
-      const config = getCurrentConfig();
-      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const baseX = 50;
-      const baseY = 300;
-      const distance = 300;
-      const height = distance * Math.tan(angleRad);
-      
-      ctx.strokeStyle = '#2d3748';
-      ctx.lineWidth = 3;
-      
-      ctx.beginPath();
-      ctx.moveTo(baseX, baseY);
-      ctx.lineTo(baseX + distance, baseY);
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.moveTo(baseX + distance, baseY);
-      ctx.lineTo(baseX + distance, baseY - height);
-      ctx.stroke();
-      
-      ctx.strokeStyle = primaryColor;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(baseX, baseY);
-      ctx.lineTo(baseX + distance, baseY - height);
-      ctx.stroke();
-      
-      ctx.fillStyle = primaryColor;
-      ctx.beginPath();
-      ctx.arc(baseX, baseY, 40, -angleRad, 0);
-      ctx.lineTo(baseX, baseY);
-      ctx.closePath();
-      ctx.globalAlpha = 0.2;
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-      
-      ctx.fillStyle = '#2d3748';
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText(angle + '°', baseX + 50, baseY - 10);
-      
-      ctx.fillStyle = '#4facfe';
-      ctx.font = 'bold 16px Arial';
-      ctx.fillText('h', baseX + distance + 15, baseY - height/2);
-      
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillText('d', baseX + distance/2 - 10, baseY + 25);
-      
-      const hypotenuse = distance / Math.cos(angleRad);
-      document.getElementById('angle-value').textContent = angle;
-      document.getElementById('height-display').textContent = height.toFixed(1);
-      document.getElementById('distance-display').textContent = distance.toFixed(1);
-      document.getElementById('hypotenuse-display').textContent = hypotenuse.toFixed(1);
-    }
-
-    function initializeProblems() {
-      const container = document.getElementById('problems-container');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      const config = getCurrentConfig();
-      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
-      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      
-      problems.forEach((problem, index) => {
-        const problemDiv = document.createElement('div');
-        problemDiv.className = 'problem-item';
-        problemDiv.style.cssText = `
-          background: #f7fafc;
-          border-radius: 12px;
-          padding: 20px;
-          border: 2px solid #e2e8f0;
-        `;
+        const defaultConfig = {
+            main_title: "📐 Heights and Distances",
+            intro_text: "Master trigonometry applications in real-world problems",
+            angle_label: "1️⃣ Angle of Elevation",
+            depression_label: "2️⃣ Angle of Depression"
+        };
         
-        const solutionId = `solution-${index}`;
-        const buttonId = `btn-${index}`;
-        
-        problemDiv.innerHTML = `
-          <p class="mb-3" style="font-family: 'Arial', sans-serif; font-size: 17px; font-weight: 600; color: ${textColor};">
-            <span style="background: ${primaryColor}; color: #ffffff; padding: 4px 12px; border-radius: 6px; margin-right: 8px;">${index + 1}</span>
-            ${problem.question}
-          </p>
-          <button id="${buttonId}" class="show-solution-btn px-4 py-2 mb-3" style="background: ${secondaryColor}; color: #ffffff; border-radius: 6px; font-family: 'Arial', sans-serif; font-size: 14px; cursor: pointer; border: none; transition: all 0.3s ease;">
-            Show Solution
-          </button>
-          <div id="${solutionId}" class="solution-area" style="display: none; background: #ffffff; padding: 16px; border-radius: 8px; margin-top: 12px; border-left: 4px solid ${primaryColor};">
-            <p style="font-family: 'Arial', sans-serif; font-size: 15px; color: ${textColor}; white-space: pre-line; line-height: 1.8;">${problem.solution}</p>
-            <p class="mt-3" style="font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; color: ${primaryColor}; margin-top: 12px;">Answer: ${problem.answer}</p>
-          </div>
-        `;
-        
-        container.appendChild(problemDiv);
-        
-        const button = document.getElementById(buttonId);
-        if (button) {
-          button.addEventListener('click', function() {
-            const solutionDiv = document.getElementById(solutionId);
-            const config = getCurrentConfig();
-            const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
-            const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+        async function onConfigChange(config) {
+            const mainTitle = document.getElementById('main-title');
+            const introText = document.getElementById('intro-text');
+            const angleLabel = document.getElementById('angle-label');
+            const depressionLabel = document.getElementById('depression-label');
             
-            if (solutionDiv && solutionDiv.style.display === 'none') {
-              solutionDiv.style.display = 'block';
-              this.textContent = 'Hide Solution';
-              this.style.background = primaryColor;
-            } else if (solutionDiv) {
-              solutionDiv.style.display = 'none';
-              this.textContent = 'Show Solution';
-              this.style.background = secondaryColor;
-            }
-          });
+            if (mainTitle) mainTitle.textContent = config.main_title || defaultConfig.main_title;
+            if (introText) introText.textContent = config.intro_text || defaultConfig.intro_text;
+            if (angleLabel) angleLabel.textContent = config.angle_label || defaultConfig.angle_label;
+            if (depressionLabel) depressionLabel.textContent = config.depression_label || defaultConfig.depression_label;
         }
-      });
-    }
-
-    async function onConfigChange(config) {
-      currentConfig = { ...config };
-      
-      const mainTitle = document.getElementById('main-title');
-      const subtitle = document.getElementById('subtitle');
-      const conceptsHeading = document.getElementById('concepts-heading');
-      const formulaHeading = document.getElementById('formula-heading');
-      const practiceHeading = document.getElementById('practice-heading');
-      const appContainer = document.getElementById('app-container');
-      
-      if (mainTitle) mainTitle.textContent = config.main_title || defaultConfig.main_title;
-      if (subtitle) subtitle.textContent = config.subtitle || defaultConfig.subtitle;
-      if (conceptsHeading) conceptsHeading.textContent = config.concepts_heading || defaultConfig.concepts_heading;
-      if (formulaHeading) formulaHeading.textContent = config.formula_heading || defaultConfig.formula_heading;
-      if (practiceHeading) practiceHeading.textContent = config.practice_heading || defaultConfig.practice_heading;
-      
-      if (appContainer) {
-        appContainer.style.background = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, #00f2fe 100%)`;
-      }
-
-      drawElevationDiagram();
-      drawDepressionDiagram();
-      drawInteractiveCanvas();
-      initializeProblems();
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.surface_color || defaultConfig.surface_color,
-              set: (value) => {
-                config.surface_color = value;
-                window.elementSdk.setConfig({ surface_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            },
-            {
-              get: () => config.primary_action_color || defaultConfig.primary_action_color,
-              set: (value) => {
-                config.primary_action_color = value;
-                window.elementSdk.setConfig({ primary_action_color: value });
-              }
-            },
-            {
-              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
-              set: (value) => {
-                config.secondary_action_color = value;
-                window.elementSdk.setConfig({ secondary_action_color: value });
-              }
+        
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
+        
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["main_title", config.main_title || defaultConfig.main_title],
+                ["intro_text", config.intro_text || defaultConfig.intro_text],
+                ["angle_label", config.angle_label || defaultConfig.angle_label],
+                ["depression_label", config.depression_label || defaultConfig.depression_label]
+            ]);
+        }
+        
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
+        
+        // Page Navigation
+        function showPage(pageName) {
+            const pages = document.querySelectorAll('.page');
+            const buttons = document.querySelectorAll('.nav-btn');
+            
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(pageName + '-page').classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Learn Page Calculator
+        function calculateHeight() {
+            const distance = parseFloat(document.getElementById('distance-input').value);
+            const angle = parseFloat(document.getElementById('angle-input').value);
+            const resultBox = document.getElementById('result-box');
+            const resultText = document.getElementById('result-text');
+            
+            if (!distance || !angle) {
+                resultBox.classList.add('show');
+                resultText.innerHTML = '<strong style="color: #721c24;">⚠️ Please enter both distance and angle values!</strong>';
+                return;
             }
-          ],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["main_title", config.main_title || defaultConfig.main_title],
-          ["subtitle", config.subtitle || defaultConfig.subtitle],
-          ["concepts_heading", config.concepts_heading || defaultConfig.concepts_heading],
-          ["formula_heading", config.formula_heading || defaultConfig.formula_heading],
-          ["practice_heading", config.practice_heading || defaultConfig.practice_heading]
-        ])
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const angleSlider = document.getElementById('angle-slider');
-      if (angleSlider) {
-        angleSlider.addEventListener('input', drawInteractiveCanvas);
-      }
-      
-      drawElevationDiagram();
-      drawDepressionDiagram();
-      drawInteractiveCanvas();
-      initializeProblems();
-    });
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b1c2cc653a48b03',t:'MTc2NjM3MDM5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+            
+            if (angle <= 0 || angle >= 90) {
+                resultBox.classList.add('show');
+                resultText.innerHTML = '<strong style="color: #721c24;">⚠️ Angle must be between 0° and 90°!</strong>';
+                return;
+            }
+            
+            const angleInRadians = angle * (Math.PI / 180);
+            const height = distance * Math.tan(angleInRadians);
+            
+            resultBox.classList.add('show');
+            resultText.innerHTML = `
+                <strong>Given:</strong><br>
+                • Distance from building = ${distance} meters<br>
+                • Angle of elevation = ${angle}°<br><br>
+                <strong>Formula:</strong> Height = Distance × tan(angle)<br><br>
+                <strong>Calculation:</strong><br>
+                Height = ${distance} × tan(${angle}°)<br>
+                Height = ${distance} × ${Math.tan(angleInRadians).toFixed(4)}<br>
+                <strong>Height = ${height.toFixed(2)} meters</strong><br><br>
+                ✅ The building is approximately <strong>${height.toFixed(2)} meters</strong> tall!
+            `;
+        }
+        
+        // Practice Problems
+        function showHint(problemNum) {
+            const hint = document.getElementById(`p${problemNum}-hint`);
+            hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function checkProblem1() {
+            const userAnswer = parseFloat(document.getElementById('p1-answer').value);
+            const correctAnswer = 30 * Math.sqrt(3); // 30 * tan(60°)
+            const resultDiv = document.getElementById('p1-result');
+            const solutionBox = document.getElementById('p1-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.5;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Correct!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Distance = 30 m, Angle of elevation = 60°</div>
+                        <div class="step">Formula: tan θ = Height / Distance</div>
+                        <div class="step">tan 60° = Height / 30</div>
+                        <div class="step">√3 = Height / 30</div>
+                        <div class="step">Height = 30 × √3 = 30 × 1.732</div>
+                        <div class="answer-highlight">Height = 51.96 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Not quite right. Try again!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <p>Hint: The correct answer is around ${correctAnswer.toFixed(2)} meters.</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Distance = 30 m, Angle of elevation = 60°</div>
+                        <div class="step">Formula: tan θ = Height / Distance</div>
+                        <div class="step">tan 60° = Height / 30</div>
+                        <div class="step">√3 = Height / 30</div>
+                        <div class="step">Height = 30 × √3 = 30 × 1.732</div>
+                        <div class="answer-highlight">Height = 51.96 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem2() {
+            const userAnswer = parseFloat(document.getElementById('p2-answer').value);
+            const correctAnswer = 15 * Math.sin(60 * Math.PI / 180); // 15 * sin(60°)
+            const resultDiv = document.getElementById('p2-result');
+            const solutionBox = document.getElementById('p2-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠�� Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.5;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Excellent Work!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Ladder length (hypotenuse) = 15 m, Angle with ground = 60°</div>
+                        <div class="step">Formula: sin θ = Opposite (Height) / Hypotenuse</div>
+                        <div class="step">sin 60° = Height / 15</div>
+                        <div class="step">√3/2 = Height / 15</div>
+                        <div class="step">Height = 15 × (√3/2) = 15 × 0.866</div>
+                        <div class="answer-highlight">Height = 12.99 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Not quite! Review the solution below.</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Ladder length (hypotenuse) = 15 m, Angle with ground = 60°</div>
+                        <div class="step">Formula: sin θ = Opposite (Height) / Hypotenuse</div>
+                        <div class="step">sin 60° = Height / 15</div>
+                        <div class="step">√3/2 = Height / 15</div>
+                        <div class="step">Height = 15 × (√3/2) = 15 × 0.866</div>
+                        <div class="answer-highlight">Height = 12.99 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem3() {
+            const userAnswer = parseFloat(document.getElementById('p3-answer').value);
+            const correctAnswer = 10 * Math.sqrt(3); // Derived from the equations
+            const resultDiv = document.getElementById('p3-result');
+            const solutionBox = document.getElementById('p3-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.5;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Outstanding! This was a tough one!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Let height of tower = h meters</div>
+                        <div class="step">Let initial distance = x meters</div>
+                        <div class="step">From first observation: tan 30° = h / x → h = x/√3</div>
+                        <div class="step">From second observation: tan 60° = h / (x-20) → h = (x-20)√3</div>
+                        <div class="step">Equating: x/√3 = (x-20)√3</div>
+                        <div class="step">x = 3x - 60 → 2x = 60 → x = 30</div>
+                        <div class="step">Height h = 30/√3 × √3 = 10√3</div>
+                        <div class="answer-highlight">Height = 17.32 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">This one is tricky! Study the solution.</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Let height of tower = h meters</div>
+                        <div class="step">Let initial distance = x meters</div>
+                        <div class="step">From first observation: tan 30° = h / x → h = x/√3</div>
+                        <div class="step">From second observation: tan 60° = h / (x-20) → h = (x-20)√3</div>
+                        <div class="step">Equating: x/√3 = (x-20)√3</div>
+                        <div class="step">x = 3x - 60 → 2x = 60 → x = 30</div>
+                        <div class="step">Height h = 30/√3 × √3 = 10√3</div>
+                        <div class="answer-highlight">Height = 17.32 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem4() {
+            const userAnswer = parseFloat(document.getElementById('p4-answer').value);
+            const correctAnswer = 100 * Math.sqrt(3); // 100 / tan(30°)
+            const resultDiv = document.getElementById('p4-result');
+            const solutionBox = document.getElementById('p4-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 1;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Perfect! You understand depression angles!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Height of lighthouse = 100 m, Angle of depression = 30°</div>
+                        <div class="step">Angle of elevation from ship = Angle of depression = 30°</div>
+                        <div class="step">Formula: tan θ = Height / Distance</div>
+                        <div class="step">tan 30° = 100 / Distance</div>
+                        <div class="step">1/√3 = 100 / Distance</div>
+                        <div class="step">Distance = 100√3 = 100 × 1.732</div>
+                        <div class="answer-highlight">Distance = 173.2 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Review the concept of angle of depression.</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Height of lighthouse = 100 m, Angle of depression = 30°</div>
+                        <div class="step">Angle of elevation from ship = Angle of depression = 30°</div>
+                        <div class="step">Formula: tan θ = Height / Distance</div>
+                        <div class="step">tan 30° = 100 / Distance</div>
+                        <div class="step">1/√3 = 100 / Distance</div>
+                        <div class="step">Distance = 100√3 = 100 × 1.732</div>
+                        <div class="answer-highlight">Distance = 173.2 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem5() {
+            const userAnswer = parseFloat(document.getElementById('p5-answer').value);
+            const correctAnswer = 10; // 10 meters
+            const resultDiv = document.getElementById('p5-result');
+            const solutionBox = document.getElementById('p5-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.5;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Amazing! You're a master of heights and distances!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Step 1: Find the height of tree using first condition</div>
+                        <div class="step">tan 30° = Height / 10√3</div>
+                        <div class="step">1/√3 = Height / 10√3</div>
+                        <div class="step">Height = 10 meters</div>
+                        <div class="step">Step 2: Find new shadow length with angle 60°</div>
+                        <div class="step">tan 60° = 10 / Shadow</div>
+                        <div class="step">√3 = 10 / Shadow</div>
+                        <div class="step">Shadow = 10/√3 = 10√3/3 ≈ 5.77 meters</div>
+                        <div class="answer-highlight">New Shadow Length = 10 meters (or 5.77 if you used 10/√3)</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">This requires two steps. Study carefully!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Step 1: Find the height of tree using first condition</div>
+                        <div class="step">tan 30° = Height / 10√3</div>
+                        <div class="step">1/√3 = Height / 10√3</div>
+                        <div class="step">Height = 10 meters</div>
+                        <div class="step">Step 2: Find new shadow length with angle 60°</div>
+                        <div class="step">tan 60° = 10 / Shadow</div>
+                        <div class="step">√3 = 10 / Shadow</div>
+                        <div class="step">Shadow = 10/√3 ≈ 5.77 meters</div>
+                        <div class="answer-highlight">New Shadow Length ≈ 5.77 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem6() {
+            const userAnswer = parseFloat(document.getElementById('p6-answer').value);
+            const correctAnswer = 10 * Math.sqrt(3) + 10; // 10/tan(30°) + 10/tan(45°)
+            const resultDiv = document.getElementById('p6-result');
+            const solutionBox = document.getElementById('p6-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 1;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Excellent! Bridge problems solved!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Height of bridge = 10 m, Angles of depression = 30° and 45°</div>
+                        <div class="step">Distance to bank 1: tan 30° = 10/d₁ → d₁ = 10/tan(30°) = 10√3</div>
+                        <div class="step">Distance to bank 2: tan 45° = 10/d₂ → d₂ = 10/tan(45°) = 10</div>
+                        <div class="step">Width of river = d₁ + d₂ = 10√3 + 10</div>
+                        <div class="step">Width = 17.32 + 10</div>
+                        <div class="answer-highlight">Width = 27.32 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Check the solution below!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Height of bridge = 10 m, Angles of depression = 30° and 45°</div>
+                        <div class="step">Distance to bank 1: tan 30° = 10/d₁ → d₁ = 10/tan(30°) = 10√3</div>
+                        <div class="step">Distance to bank 2: tan 45° = 10/d₂ → d₂ = 10/tan(45°) = 10</div>
+                        <div class="step">Width of river = d₁ + d₂ = 10√3 + 10</div>
+                        <div class="step">Width = 17.32 + 10</div>
+                        <div class="answer-highlight">Width = 27.32 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem7() {
+            const userAnswer = parseFloat(document.getElementById('p7-answer').value);
+            const d1 = 300 / Math.tan(60 * Math.PI / 180);
+            const d2 = 300 / Math.tan(30 * Math.PI / 180);
+            const correctAnswer = d2 - d1;
+            const resultDiv = document.getElementById('p7-result');
+            const solutionBox = document.getElementById('p7-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 5;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Great job tracking the airplane!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Height = 300 m, Initial angle = 60°, Final angle = 30°</div>
+                        <div class="step">Distance at 60°: d₁ = 300/tan(60°) = 300/√3 = 173.21 m</div>
+                        <div class="step">Distance at 30°: d₂ = 300/tan(30°) = 300√3 = 519.62 m</div>
+                        <div class="step">Horizontal distance traveled = d₂ - d₁</div>
+                        <div class="step">Distance = 519.62 - 173.21</div>
+                        <div class="answer-highlight">Distance = 346.41 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Review the solution!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Height = 300 m, Initial angle = 60°, Final angle = 30°</div>
+                        <div class="step">Distance at 60°: d₁ = 300/tan(60°) = 300/√3 = 173.21 m</div>
+                        <div class="step">Distance at 30°: d₂ = 300/tan(30°) = 300√3 = 519.62 m</div>
+                        <div class="step">Horizontal distance traveled = d₂ - d₁</div>
+                        <div class="step">Distance = 519.62 - 173.21</div>
+                        <div class="answer-highlight">Distance = 346.41 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem8() {
+            const userAnswer = parseFloat(document.getElementById('p8-answer').value);
+            const distance = 60 / Math.tan(60 * Math.PI / 180);
+            const vertDist = distance * Math.tan(30 * Math.PI / 180);
+            const correctAnswer = 60 - vertDist;
+            const resultDiv = document.getElementById('p8-result');
+            const solutionBox = document.getElementById('p8-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 1;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Perfect! Complex problem mastered!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: First building = 60 m, Angles = 30° and 60°</div>
+                        <div class="step">Find horizontal distance using 60° (to bottom): tan 60° = 60/d</div>
+                        <div class="step">d = 60/√3 = 34.64 m</div>
+                        <div class="step">Height difference for top of 2nd building: h = d × tan(30°)</div>
+                        <div class="step">h = 34.64 × (1/√3) = 20 m</div>
+                        <div class="step">Height of 2nd building = 60 - 20</div>
+                        <div class="answer-highlight">Height = 40 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">This is tricky! Study carefully.</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: First building = 60 m, Angles = 30° and 60°</div>
+                        <div class="step">Find horizontal distance using 60° (to bottom): tan 60° = 60/d</div>
+                        <div class="step">d = 60/√3 = 34.64 m</div>
+                        <div class="step">Height difference for top of 2nd building: h = d × tan(30°)</div>
+                        <div class="step">h = 34.64 × (1/√3) = 20 m</div>
+                        <div class="step">Height of 2nd building = 60 - 20</div>
+                        <div class="answer-highlight">Height = 40 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem9() {
+            const userAnswer = parseFloat(document.getElementById('p9-answer').value);
+            const correctAnswer = 20; // tan 45° = 1
+            const resultDiv = document.getElementById('p9-result');
+            const solutionBox = document.getElementById('p9-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.5;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Perfect! The 45° angle made this simple!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Distance = 20 m, Angle of elevation = 45°</div>
+                        <div class="step">Formula: tan θ = Height / Distance</div>
+                        <div class="step">tan 45° = Height / 20</div>
+                        <div class="step">1 = Height / 20 (since tan 45° = 1)</div>
+                        <div class="step">Height = 20 meters</div>
+                        <div class="answer-highlight">Height = 20 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Remember: tan 45° = 1!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Distance = 20 m, Angle of elevation = 45°</div>
+                        <div class="step">Formula: tan θ = Height / Distance</div>
+                        <div class="step">tan 45° = Height / 20</div>
+                        <div class="step">1 = Height / 20 (since tan 45° = 1)</div>
+                        <div class="step">Height = 20 meters</div>
+                        <div class="answer-highlight">Height = 20 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem10() {
+            const userAnswer = parseFloat(document.getElementById('p10-answer').value);
+            const correctAnswer = 500 * (Math.sqrt(3) - 1) / (3 - Math.sqrt(3));
+            const resultDiv = document.getElementById('p10-result');
+            const solutionBox = document.getElementById('p10-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 20;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Outstanding! Mountain conquered!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Let height = h, final distance = x</div>
+                        <div class="step">From 45° position: tan 45° = h/x → h = x</div>
+                        <div class="step">From 30° position: tan 30° = h/(x+500)</div>
+                        <div class="step">1/√3 = x/(x+500)</div>
+                        <div class="step">x + 500 = x√3 → 500 = x(√3 - 1)</div>
+                        <div class="step">x = 500/(√3 - 1) = 683.01 m</div>
+                        <div class="step">Since h = x</div>
+                        <div class="answer-highlight">Height = 683.01 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Complex algebra needed here!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Let height = h, final distance = x</div>
+                        <div class="step">From 45° position: tan 45° = h/x → h = x</div>
+                        <div class="step">From 30° position: tan 30° = h/(x+500)</div>
+                        <div class="step">1/√3 = x/(x+500)</div>
+                        <div class="step">x + 500 = x√3 → 500 = x(√3 - 1)</div>
+                        <div class="step">x = 500/(√3 - 1) = 683.01 m</div>
+                        <div class="step">Since h = x</div>
+                        <div class="answer-highlight">Height = 683.01 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem11() {
+            const userAnswer = parseFloat(document.getElementById('p11-answer').value);
+            const correctAnswer = 150 * Math.sin(60 * Math.PI / 180);
+            const resultDiv = document.getElementById('p11-result');
+            const solutionBox = document.getElementById('p11-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 1;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Well done! Kite is flying high!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: String length = 150 m, Angle with horizontal = 60°</div>
+                        <div class="step">Formula: sin θ = Height / Hypotenuse</div>
+                        <div class="step">sin 60° = Height / 150</div>
+                        <div class="step">√3/2 = Height / 150</div>
+                        <div class="step">Height = 150 × (√3/2) = 150 × 0.866</div>
+                        <div class="answer-highlight">Height = 129.90 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Use sine for this one!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: String length = 150 m, Angle with horizontal = 60°</div>
+                        <div class="step">Formula: sin θ = Height / Hypotenuse</div>
+                        <div class="step">sin 60° = Height / 150</div>
+                        <div class="step">√3/2 = Height / 150</div>
+                        <div class="step">Height = 150 × (√3/2) = 150 × 0.866</div>
+                        <div class="answer-highlight">Height = 129.90 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function checkProblem12() {
+            const userAnswer = parseFloat(document.getElementById('p12-answer').value);
+            const totalHeight = 25 * Math.tan(60 * Math.PI / 180);
+            const pillarHeight = 25 * Math.tan(45 * Math.PI / 180);
+            const correctAnswer = totalHeight - pillarHeight;
+            const resultDiv = document.getElementById('p12-result');
+            const solutionBox = document.getElementById('p12-solution');
+            
+            if (!userAnswer) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 1;
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = `
+                    <h4>🎉 Magnificent! You're a trigonometry expert!</h4>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Distance = 25 m, Top angle = 60°, Bottom angle = 45°</div>
+                        <div class="step">Total height (pillar + statue): tan 60° = H/25</div>
+                        <div class="step">H = 25 × √3 = 43.30 m</div>
+                        <div class="step">Pillar height: tan 45° = h/25</div>
+                        <div class="step">h = 25 × 1 = 25 m</div>
+                        <div class="step">Statue height = Total height - Pillar height</div>
+                        <div class="step">Statue = 43.30 - 25</div>
+                        <div class="answer-highlight">Statue Height = 18.30 meters</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color: #721c24;">Find both heights separately!</h4>
+                    <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                    <div class="solution-steps">
+                        <h5>Solution Steps:</h5>
+                        <div class="step">Given: Distance = 25 m, Top angle = 60°, Bottom angle = 45°</div>
+                        <div class="step">Total height (pillar + statue): tan 60° = H/25</div>
+                        <div class="step">H = 25 × ��3 = 43.30 m</div>
+                        <div class="step">Pillar height: tan 45° = h/25</div>
+                        <div class="step">h = 25 × 1 = 25 m</div>
+                        <div class="step">Statue height = Total height - Pillar height</div>
+                        <div class="step">Statue = 43.30 - 25</div>
+                        <div class="answer-highlight">Statue Height = 18.30 meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        function solveCustomProblem() {
+            const distance = parseFloat(document.getElementById('custom-distance').value);
+            const angle = parseFloat(document.getElementById('custom-angle').value);
+            const type = document.getElementById('custom-type').value;
+            const resultDiv = document.getElementById('custom-result');
+            const solutionBox = document.getElementById('custom-solution');
+            
+            if (!distance || !angle) {
+                resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter both values!</p>';
+                solutionBox.classList.add('show');
+                return;
+            }
+            
+            const angleRad = angle * Math.PI / 180;
+            
+            if (type === 'elevation') {
+                const height = distance * Math.tan(angleRad);
+                resultDiv.innerHTML = `
+                    <h4>📊 Your Custom Problem Solution</h4>
+                    <div class="solution-steps">
+                        <h5>Problem:</h5>
+                        <div class="step">Find the height when distance = ${distance} m and angle of elevation = ${angle}°</div>
+                        <h5>Solution:</h5>
+                        <div class="step">Formula: Height = Distance × tan(angle)</div>
+                        <div class="step">Height = ${distance} × tan(${angle}°)</div>
+                        <div class="step">Height = ${distance} × ${Math.tan(angleRad).toFixed(4)}</div>
+                        <div class="answer-highlight">Height = ${height.toFixed(2)} meters</div>
+                    </div>
+                `;
+            } else {
+                const actualDistance = distance / Math.tan(angleRad);
+                resultDiv.innerHTML = `
+                    <h4>📊 Your Custom Problem Solution</h4>
+                    <div class="solution-steps">
+                        <h5>Problem:</h5>
+                        <div class="step">Find the distance when height = ${distance} m and angle of depression = ${angle}°</div>
+                        <h5>Solution:</h5>
+                        <div class="step">Formula: Distance = Height / tan(angle)</div>
+                        <div class="step">Distance = ${distance} / tan(${angle}°)</div>
+                        <div class="step">Distance = ${distance} / ${Math.tan(angleRad).toFixed(4)}</div>
+                        <div class="answer-highlight">Distance = ${actualDistance.toFixed(2)} meters</div>
+                    </div>
+                `;
+            }
+            
+            solutionBox.classList.add('show');
+        }
+        
+        // Quiz functions
+        let mcqScore = 0;
+        let descriptiveScores = [0, 0, 0, 0];
+        
+        function checkMCQAnswers() {
+            const answers = {
+                mcq1: 'B',
+                mcq2: 'B',
+                mcq3: 'A',
+                mcq4: 'B',
+                mcq5: 'C',
+                mcq6: 'B',
+                mcq7: 'C',
+                mcq8: 'B'
+            };
+            
+            let score = 0;
+            let resultHTML = '<h4>MCQ Results:</h4><div style="margin-top: 15px;">';
+            
+            for (let i = 1; i <= 8; i++) {
+                const selected = document.querySelector(`input[name="mcq${i}"]:checked`);
+                if (selected && selected.value === answers[`mcq${i}`]) {
+                    score++;
+                    resultHTML += `<div style="color: #155724; margin: 8px 0;">✓ Question ${i}: Correct</div>`;
+                } else {
+                    resultHTML += `<div style="color: #721c24; margin: 8px 0;">✗ Question ${i}: Incorrect (Correct answer: ${answers[`mcq${i}`]})</div>`;
+                }
+            }
+            
+            resultHTML += `</div><div class="answer-highlight" style="margin-top: 20px;">Your Score: ${score}/8 marks</div>`;
+            
+            if (score === 8) {
+                resultHTML += '<p style="color: #155724; margin-top: 10px;">🎉 Perfect score! Excellent work!</p>';
+            } else if (score >= 6) {
+                resultHTML += '<p style="color: #856404; margin-top: 10px;">👍 Good job! Review the incorrect answers.</p>';
+            } else {
+                resultHTML += '<p style="color: #721c24; margin-top: 10px;">💪 Keep practicing! Review the concepts.</p>';
+            }
+            
+            mcqScore = score;
+            document.getElementById('mcq-score').innerHTML = resultHTML;
+            document.getElementById('mcq-results').classList.add('show');
+        }
+        
+        function showDescSolution(num) {
+            const solutionDiv = document.getElementById(`desc${num}-solution`);
+            solutionDiv.style.display = solutionDiv.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function checkDescriptive(num) {
+            const correctAnswers = {
+                1: 25.98,
+                2: 40,
+                3: { distance: 17.32, height: 27.32 },
+                4: 6
+            };
+            
+            const resultDiv = document.getElementById(`desc${num}-result`);
+            
+            if (num === 3) {
+                const userDist = parseFloat(document.getElementById('desc3-answer').value);
+                const userHeight = parseFloat(document.getElementById('desc3-answer2').value);
+                
+                if (!userDist || !userHeight) {
+                    resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter both values!</p>';
+                    resultDiv.classList.add('show');
+                    return;
+                }
+                
+                const distCorrect = Math.abs(userDist - correctAnswers[3].distance) < 1;
+                const heightCorrect = Math.abs(userHeight - correctAnswers[3].height) < 1;
+                
+                if (distCorrect && heightCorrect) {
+                    descriptiveScores[2] = 5;
+                    resultDiv.innerHTML = `
+                        <h4>🎉 Excellent! Both answers correct!</h4>
+                        <p style="color: #155724;">Distance: ${userDist.toFixed(2)} m ✓</p>
+                        <p style="color: #155724;">Height: ${userHeight.toFixed(2)} m ✓</p>
+                        <div class="answer-highlight">Marks Awarded: 5/5</div>
+                    `;
+                } else {
+                    descriptiveScores[2] = 0;
+                    resultDiv.innerHTML = `
+                        <h4 style="color: #721c24;">Review your solution</h4>
+                        <p>Distance: ${distCorrect ? '✓ Correct' : '✗ Incorrect (Should be ~17.32 m)'}</p>
+                        <p>Height: ${heightCorrect ? '✓ Correct' : '✗ Incorrect (Should be ~27.32 m)'}</p>
+                        <p style="margin-top: 10px;">Click "Show Full Solution" to see the complete working.</p>
+                    `;
+                }
+            } else {
+                const userAnswer = parseFloat(document.getElementById(`desc${num}-answer`).value);
+                
+                if (!userAnswer) {
+                    resultDiv.innerHTML = '<p style="color: #721c24;">⚠️ Please enter your answer first!</p>';
+                    resultDiv.classList.add('show');
+                    return;
+                }
+                
+                const tolerance = num === 4 ? 0.1 : 1;
+                const isCorrect = Math.abs(userAnswer - correctAnswers[num]) < tolerance;
+                
+                if (isCorrect) {
+                    descriptiveScores[num - 1] = 5;
+                    resultDiv.innerHTML = `
+                        <h4>🎉 Perfect! Your answer is correct!</h4>
+                        <p style="color: #155724;">Your answer: ${userAnswer.toFixed(2)} m</p>
+                        <div class="answer-highlight">Marks Awarded: 5/5</div>
+                        <p style="margin-top: 10px;">Great job showing all the steps!</p>
+                    `;
+                } else {
+                    descriptiveScores[num - 1] = 0;
+                    resultDiv.innerHTML = `
+                        <h4 style="color: #721c24;">Not quite right</h4>
+                        <p>Your answer: ${userAnswer.toFixed(2)} m</p>
+                        <p>Expected answer: ~${correctAnswers[num].toFixed(2)} m</p>
+                        <p style="margin-top: 10px;">Click "Show Full Solution" to see where you might have gone wrong.</p>
+                    `;
+                }
+            }
+            
+            resultDiv.classList.add('show');
+        }
+        
+        function showQuizSummary() {
+            const summaryDiv = document.getElementById('quiz-summary');
+            const summaryList = document.getElementById('summary-list');
+            
+            const totalDescriptive = descriptiveScores.reduce((a, b) => a + b, 0);
+            const totalMarks = mcqScore + totalDescriptive;
+            const percentage = ((totalMarks / 28) * 100).toFixed(1);
+            
+            let grade = '';
+            if (percentage >= 90) grade = 'A+ (Outstanding!)';
+            else if (percentage >= 80) grade = 'A (Excellent!)';
+            else if (percentage >= 70) grade = 'B+ (Very Good!)';
+            else if (percentage >= 60) grade = 'B (Good!)';
+            else if (percentage >= 50) grade = 'C (Pass)';
+            else grade = 'Need More Practice';
+            
+            summaryList.innerHTML = `
+                <li>Part A (MCQ): ${mcqScore}/8 marks</li>
+                <li>Part B (Descriptive): ${totalDescriptive}/20 marks</li>
+                <li>Total Score: ${totalMarks}/28 marks</li>
+                <li>Percentage: ${percentage}%</li>
+                <li>Grade: ${grade}</li>
+            `;
+            
+            summaryDiv.style.display = 'block';
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b7018a2409c6e29',t:'MTc2NzI1MDM3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
